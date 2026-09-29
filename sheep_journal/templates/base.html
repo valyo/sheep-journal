@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{% endblock %} · Stalljournal</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header class="topbar no-print">
+    <a class="brand" href="{{ url_for('main.dashboard') }}">Stalljournal <span>får &amp; get</span></a>
+    <nav>
+      {% set ep = request.endpoint or '' %}
+      <a href="{{ url_for('main.dashboard') }}" {% if ep == 'main.dashboard' %}aria-current="page"{% endif %}>Overview</a>
+      <a href="{{ url_for('journal.index') }}" {% if ep in ('journal.index', 'journal.edit', 'journal.print_sheet') %}aria-current="page"{% endif %}>Journal</a>
+      <a href="{{ url_for('journal.new', direction='in') }}" {% if ep == 'journal.new' and direction == 'in' %}aria-current="page"{% endif %}>+ In</a>
+      <a href="{{ url_for('journal.new', direction='out') }}" {% if ep == 'journal.new' and direction == 'out' %}aria-current="page"{% endif %}>− Out</a>
+      <a href="{{ url_for('animals.index') }}" {% if ep.startswith('animals.') %}aria-current="page"{% endif %}>Animals</a>
+      <a href="{{ url_for('main.counts') }}" {% if ep == 'main.counts' %}aria-current="page"{% endif %}>December count</a>
+      <a href="{{ url_for('main.holding') }}" {% if ep == 'main.holding' %}aria-current="page"{% endif %}>Holding</a>
+    </nav>
+    {% if holding %}<span class="ppn">PPN {{ holding.ppn }}</span>{% endif %}
+  </header>
+
+  <main>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <div class="flash flash-{{ category }} no-print" role="status">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="no-print">
+    Record events within 48 hours · keep the journal for at least 5 years ·
+    report movements to Jordbruksverket within 7 days ·
+    <a href="{{ url_for('main.export_csv') }}">Export CSV</a>
+  </footer>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Animals{% endblock %}
+{% block content %}
+<h1>Individually recorded animals</h1>
+<p class="lede">Every animal that will live 12 months or longer, built from its journal rows. Group-recorded slaughter lambs don't appear here.</p>
+
+<nav class="tabs">
+  {% for key, label in statuses.items() %}
+    <a href="{{ url_for('animals.index', status=key, species=species) }}" {% if status == key %}aria-current="page"{% endif %}>{{ label }}</a>
+  {% endfor %}
+</nav>
+
+{% if animals %}
+<div class="table-wrap">
+<table>
+  <thead><tr><th>ID</th><th>Species</th><th>Sex</th><th>Born</th><th>Breed</th><th>First recorded</th><th>Last event</th><th>Status</th></tr></thead>
+  <tbody>
+  {% for a in animals %}
+    <tr>
+      <td class="nowrap"><a href="{{ url_for('animals.detail', species=a.species, ppn=a.ppn, individual_number=a.individual_number) }}">{{ a.ppn }}-{{ a.individual_number }}</a>{% if a.electronic_tag %} <span class="badge" title="Electronic ear tag">E</span>{% endif %}</td>
+      <td>{{ a.species|species_label }}</td>
+      <td>{{ a.sex|sex_label }}</td>
+      <td>{{ a.birth_year or '' }}</td>
+      <td>{{ a.breed or '' }}</td>
+      <td class="nowrap">{{ a.first_date }}</td>
+      <td>{{ a.last_event|event_label }} <span class="muted nowrap">{{ a.last_date }}</span></td>
+      <td><span class="status status-{{ a.status }}">{{ statuses[a.status] }}</span></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+<p class="muted">{{ animals|length }} animal(s).</p>
+{% else %}
+<p class="muted">No animals in this list.</p>
+{% endif %}
+{% endblock %}

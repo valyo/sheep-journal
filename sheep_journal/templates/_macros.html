@@ -1,0 +1,71 @@
+{% macro field_error(name, errors) -%}
+  {% if errors.get(name) %}<p class="error" id="{{ name }}-error">{{ errors[name] }}</p>{% endif %}
+{%- endmacro %}
+
+{% macro field_value(values, name) -%}
+  {{ '' if values.get(name) is none else values.get(name) }}
+{%- endmacro %}
+
+{% macro field(name, label, values, errors, type="text", help=None, show=None, attrs="") %}
+<div class="field{% if errors.get(name) %} has-error{% endif %}"{% if show %} data-show="{{ show }}"{% endif %}>
+  <label for="{{ name }}">{{ label }}</label>
+  <input type="{{ type }}" id="{{ name }}" name="{{ name }}" value="{{ field_value(values, name) }}"
+         {% if errors.get(name) %}aria-invalid="true" aria-describedby="{{ name }}-error"{% endif %} {{ attrs|safe }}>
+  {% if help %}<small>{{ help }}</small>{% endif %}
+  {{ field_error(name, errors) }}
+</div>
+{% endmacro %}
+
+{% macro textarea(name, label, values, errors, help=None, show=None) %}
+<div class="field wide{% if errors.get(name) %} has-error{% endif %}"{% if show %} data-show="{{ show }}"{% endif %}>
+  <label for="{{ name }}">{{ label }}</label>
+  <textarea id="{{ name }}" name="{{ name }}" rows="2">{{ field_value(values, name) }}</textarea>
+  {% if help %}<small>{{ help }}</small>{% endif %}
+  {{ field_error(name, errors) }}
+</div>
+{% endmacro %}
+
+{% macro select(name, label, options, values, errors, blank=None, help=None, show=None) %}
+<div class="field{% if errors.get(name) %} has-error{% endif %}"{% if show %} data-show="{{ show }}"{% endif %}>
+  <label for="{{ name }}">{{ label }}</label>
+  <select id="{{ name }}" name="{{ name }}">
+    {% if blank is not none %}<option value="">{{ blank }}</option>{% endif %}
+    {% for key, text in options.items() %}
+      <option value="{{ key }}" {% if values.get(name)|string == key|string %}selected{% endif %}>{{ text }}</option>
+    {% endfor %}
+  </select>
+  {% if help %}<small>{{ help }}</small>{% endif %}
+  {{ field_error(name, errors) }}
+</div>
+{% endmacro %}
+
+{% macro checkbox(name, label, values, help=None, show=None) %}
+<div class="field check wide"{% if show %} data-show="{{ show }}"{% endif %}>
+  <label>
+    <input type="checkbox" name="{{ name }}" value="1" {% if values.get(name) not in (none, '', 0, '0') %}checked{% endif %}>
+    {{ label }}
+  </label>
+  {% if help %}<small>{{ help }}</small>{% endif %}
+</div>
+{% endmacro %}
+
+{% macro warning_box(warnings) %}
+{% if warnings %}
+<div class="notice notice-warning" role="alert">
+  <strong>Please check before saving:</strong>
+  <ul>{% for w in warnings %}<li>{{ w }}</li>{% endfor %}</ul>
+  {% for w in warnings %}<input type="hidden" name="ack" value="{{ w }}">{% endfor %}
+  <p>Correct the entry, or save it anyway if it is right.</p>
+</div>
+{% endif %}
+{% endmacro %}
+
+{% macro direction_badge(direction) -%}
+  <span class="dir dir-{{ direction }}" title="{{ 'Plusblad' if direction == 'in' else 'Minusblad' }}">{{ '+' if direction == 'in' else '−' }}</span>
+{%- endmacro %}
+
+{% macro animal_id(entry) -%}
+  {% if entry.individual_number %}
+    <a href="{{ url_for('animals.detail', species=entry.species, ppn=entry.ppn, individual_number=entry.individual_number) }}">{{ entry.ppn }}-{{ entry.individual_number }}</a>
+  {% else %}{{ entry.ppn }}{% endif %}
+{%- endmacro %}

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% from "_macros.html" import field, select, textarea %}
+{% block title %}Holding{% endblock %}
+{% block content %}
+<h1>Holding (produktionsplats)</h1>
+<p class="lede">The journal covers one production site. Register the site with Jordbruksverket before you keep animals there.</p>
+
+<form method="post" class="form">
+  <div class="grid">
+    {{ field("ppn", "Production site number (PPN)", values, errors, help="As registered with Jordbruksverket, e.g. 12345", attrs='inputmode="numeric" required') }}
+    {{ field("keeper_name", "Animal keeper (djurhållare)", values, errors, attrs="required") }}
+    {{ textarea("address", "Address of the site", values, errors) }}
+    {{ select("species", "Animals kept", HOLDING_SPECIES, values, errors) }}
+    {{ select("category", "Category (inriktning)", CATEGORY_OPTIONS, values, errors, blank="—") }}
+    {{ field("main_breed", "Main breed (huvudsaklig ras)", values, errors, help="Animals of other breeds get the breed noted on their row.") }}
+    {{ field("journal_start", "Journal started", values, errors, type="date") }}
+  </div>
+  <button type="submit">Save</button>
+</form>
+{% endblock %}

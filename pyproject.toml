@@ -1,0 +1,9 @@
+[project]
+name = "sheep-journal"
+version = "0.1.0"
+description = "Stalljournal (fårjournal) for sheep and goats, following Jordbruksverket's record-keeping rules"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

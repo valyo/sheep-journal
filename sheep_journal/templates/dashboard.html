@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% from "_macros.html" import direction_badge, animal_id %}
+{% block title %}Overview{% endblock %}
+{% block content %}
+<h1>{% if holding %}{{ holding.keeper_name }}{% else %}Welcome{% endif %}</h1>
+{% if holding %}
+  <p class="lede">Production site {{ holding.ppn }}{% if holding.category %} · {{ holding.category }}{% endif %}{% if holding.main_breed %} · {{ holding.main_breed }}{% endif %}</p>
+{% endif %}
+
+<section class="cards">
+  {% for s in summary %}
+  <div class="card stat">
+    <h2>{{ s.species|species_label }}</h2>
+    <p class="big">{{ s.present }}</p>
+    <p class="muted">on the holding</p>
+    <dl>
+      <div><dt>Recorded individually</dt><dd>{{ s.individuals }}</dd></div>
+      <div><dt>Recorded in groups</dt><dd>{{ s.groups }}</dd></div>
+      <div><dt>Temporarily away</dt><dd>{{ s.away }}</dd></div>
+    </dl>
+  </div>
+  {% endfor %}
+  <div class="card actions">
+    <h2>Record</h2>
+    <a class="button" href="{{ url_for('journal.new', event_type='birth') }}">Lambs / kids born</a>
+    <a class="button" href="{{ url_for('journal.new', direction='in') }}">+ Arrival</a>
+    <a class="button" href="{{ url_for('journal.new', direction='out') }}">− Departure or death</a>
+    <a class="button secondary" href="{{ url_for('journal.recruit') }}">Keep a lamb for breeding</a>
+  </div>
+</section>
+
+<section>
+  <h2>To do</h2>
+  {% if warnings %}
+    <ul class="todo">
+      {% for level, message, link in warnings %}
+        <li class="todo-{{ level }}"><a href="{{ link }}">{{ message }}</a></li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="muted">Nothing to fix. The journal looks complete.</p>
+  {% endif %}
+</section>
+
+{% if recent %}
+<section>
+  <h2>Latest entries</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th></th><th>Date</th><th>Event</th><th>ID</th><th class="num">Count</th></tr></thead>
+      <tbody>
+      {% for e in recent %}
+        <tr>
+          <td>{{ direction_badge(e.direction) }}</td>
+          <td class="nowrap">{{ e.event_date }}</td>
+          <td><a href="{{ url_for('journal.edit', entry_id=e.id) }}">{{ e.event_type|event_label }}</a></td>
+          <td>{{ animal_id(e) }}</td>
+          <td class="num">{{ e.count }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p><a href="{{ url_for('journal.index') }}">Whole journal →</a></p>
+</section>
+{% endif %}
+{% endblock %}

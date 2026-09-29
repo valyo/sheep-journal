@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% from "_macros.html" import field, select, textarea, checkbox, warning_box %}
+{% block title %}Own recruitment{% endblock %}
+{% block content %}
+<h1>Keep a lamb for breeding (egen rekrytering)</h1>
+<p class="lede">
+  A lamb that was recorded as part of a group must be recorded individually once it will live 12 months or longer.
+  This writes two rows: one animal out of the group on the minus sheet, and the animal back in with its
+  individual number on the plus sheet. The balance stays correct.
+</p>
+
+<form method="post" class="form">
+  {{ warning_box(warnings) }}
+  <div class="grid">
+    {{ field("event_date", "Date", values, errors, type="date", attrs='required max="' ~ today.isoformat() ~ '"',
+             help="The day it was tagged with an individual number, if it was re-tagged.") }}
+    {{ select("species", "Species", SPECIES, values, errors) }}
+    {{ field("individual_number", "New individual number", values, errors, attrs='required autocomplete="off"',
+             help="PPN will be " ~ holding.ppn ~ ".") }}
+    {{ field("birth_year", "Birth year", values, errors, type="number", attrs='required min="1990" max="' ~ today.year ~ '"') }}
+    {{ select("sex", "Sex", SEXES, values, errors, blank="—") }}
+    {{ field("breed", "Breed", values, errors) }}
+    {{ field("previous_id", "Previous ear tag", values, errors, help="If the animal was re-tagged.") }}
+    {{ checkbox("electronic_tag", "Has an electronic ear tag", values) }}
+    {{ textarea("notes", "Notes", values, errors) }}
+  </div>
+  <div class="buttons">
+    <button type="submit">{{ 'Save anyway' if warnings else 'Save' }}</button>
+    <a href="{{ url_for('main.dashboard') }}">Cancel</a>
+  </div>
+</form>
+{% endblock %}

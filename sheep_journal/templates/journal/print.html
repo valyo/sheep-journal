@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="no-print print-controls">
+  <form method="get">
+    <select name="sheet" aria-label="Sheet">
+      <option value="plus" {% if sheet == 'plus' %}selected{% endif %}>Plusblad</option>
+      <option value="minus" {% if sheet == 'minus' %}selected{% endif %}>Minusblad</option>
+      <option value="temp" {% if sheet == 'temp' %}selected{% endif %}>Tillfälligt ute</option>
+    </select>
+    <select name="year" aria-label="Year">
+      <option value="">All years</option>
+      {% for y in years %}<option {% if year == y %}selected{% endif %}>{{ y }}</option>{% endfor %}
+    </select>
+    <select name="species" aria-label="Species">
+      <option value="">All species</option>
+      {% for key, label in SPECIES.items() %}<option value="{{ key }}" {% if species == key %}selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+    <button type="submit">Show</button>
+    <button type="button" onclick="window.print()">Print</button>
+  </form>
+</div>
+
+<article class="sheet">
+  <header class="sheet-head">
+    <h1>{{ '+ ' if sheet == 'plus' else ('− ' if sheet == 'minus' else '') }}{{ title }}</h1>
+    <p>
+      Produktionsplatsnummer: <strong>{{ holding.ppn if holding else '' }}</strong> ·
+      Djurhållare: {{ holding.keeper_name if holding else '' }}
+      {% if year %} · År {{ year }}{% endif %}
+      {% if species %} · {{ species|species_label }}{% endif %}
+    </p>
+  </header>
+
+  <table class="sheet-table">
+    <thead>
+      <tr>
+        <th rowspan="2">Rad</th>
+        <th colspan="2">Djurets ID-nummer (SE öronbricka)</th>
+        <th rowspan="2">Antal</th>
+        <th rowspan="2">Datum<br><small>{% if sheet == 'plus' %}händelse- / identifieringsdatum{% else %}händelsedatum{% endif %}</small></th>
+        {% if sheet == 'plus' %}
+          <th rowspan="2">Födelseår</th>
+          <th rowspan="2">Leverantör<br><small>PPN eller namn och adress</small></th>
+        {% else %}
+          <th rowspan="2">{{ 'Mottagare' if sheet == 'minus' else 'Till / från' }}<br><small>PPN eller namn och adress</small></th>
+          <th colspan="2">Transportör</th>
+        {% endif %}
+        <th rowspan="2">Övrigt</th>
+      </tr>
+      <tr>
+        <th>PPN</th><th>Individnr</th>
+        {% if sheet != 'plus' %}<th>Chaufförens namn</th><th>Reg.nr</th>{% endif %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for e in rows %}
+      <tr class="{% if e.voided_at %}voided{% endif %}">
+        <td>{{ loop.index }}</td>
+        <td>{{ e.ppn }}</td>
+        <td>{{ e.individual_number or '' }}</td>
+        <td class="num">{{ e.count if not e.individual_number else '' }}</td>
+        <td class="nowrap">{{ e.event_date }}</td>
+        {% if sheet == 'plus' %}
+          <td>{{ e.birth_year or '' }}</td>
+          <td>{{ e.counterparty or '' }}</td>
+        {% else %}
+          <td>{{ e.counterparty or '' }}</td>
+          <td>{{ e.driver_name or '' }}</td>
+          <td>{{ e.vehicle_reg or '' }}</td>
+        {% endif %}
+        <td>{% if sheet == 'temp' %}{{ '+' if e.direction == 'in' else '−' }} {% endif %}{{ remarks(e, holding) }}{% if e.voided_at %} (makulerad: {{ e.void_reason }}){% endif %}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="10" class="muted">Inga rader.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% if sheet == 'plus' %}
+  <section class="sheet-count">
+    <h2>Får- och geträkning i december</h2>
+    <table class="sheet-table">
+      <thead><tr><th>År</th><th>Djurslag</th><th>Datum för räkning</th><th>Antal djur</th><th>Tackor</th><th>Baggar</th><th>Lamm</th></tr></thead>
+      <tbody>
+      {% for c in counts %}
+        <tr><td>{{ c.year }}</td><td>{{ c.species|species_label }}</td><td>{{ c.count_date }}</td><td>{{ c.total }}</td><td>{{ c.ewes if c.ewes is not none else '' }}</td><td>{{ c.rams if c.rams is not none else '' }}</td><td>{{ c.lambs if c.lambs is not none else '' }}</td></tr>
+      {% else %}
+        <tr><td colspan="7" class="muted">Ingen räkning registrerad.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </section>
+  {% endif %}
+  <p class="sheet-foot">Utskrift {{ today.isoformat() }}. Makulerade rader är överstrukna.</p>
+</article>
+{% endblock %}

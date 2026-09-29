@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% from "_macros.html" import direction_badge %}
+{% block title %}{{ ppn }}-{{ individual_number }}{% endblock %}
+{% block content %}
+<h1>{{ ppn }}-{{ individual_number }} <small>{{ species|species_label }}</small></h1>
+
+{% if animal %}
+<dl class="facts">
+  <div><dt>Status</dt><dd><span class="status status-{{ animal.status }}">{{ statuses[animal.status] }}</span></dd></div>
+  <div><dt>Sex</dt><dd>{{ animal.sex|sex_label or '—' }}</dd></div>
+  <div><dt>Birth year</dt><dd>{{ animal.birth_year or '—' }}</dd></div>
+  <div><dt>Breed</dt><dd>{{ animal.breed or (holding.main_breed if holding else '') or '—' }}</dd></div>
+  {% if animal.genotype %}<div><dt>Genotype</dt><dd>{{ animal.genotype }}</dd></div>{% endif %}
+  <div><dt>Electronic tag</dt><dd>{{ 'Yes' if animal.electronic_tag else 'No' }}</dd></div>
+</dl>
+{% else %}
+<p class="muted">All entries for this animal are voided.</p>
+{% endif %}
+
+<h2>History</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th></th><th>Date</th><th>Event</th><th>Supplier / recipient</th><th>Transporter</th><th>Other</th><th></th></tr></thead>
+  <tbody>
+  {% for e in history %}
+    <tr class="{% if e.voided_at %}voided{% endif %}">
+      <td>{{ direction_badge(e.direction) }}</td>
+      <td class="nowrap">{{ e.event_date }}</td>
+      <td>{{ e.event_type|event_label }}</td>
+      <td>{{ e.counterparty or '' }}</td>
+      <td>{{ e.driver_name or '' }} {{ e.vehicle_reg or '' }}</td>
+      <td>{{ remarks(e, holding) }}{% if e.voided_at %} <span class="badge">Voided: {{ e.void_reason }}</span>{% endif %}</td>
+      <td>{% if not e.voided_at %}<a href="{{ url_for('journal.edit', entry_id=e.id) }}">Edit</a>{% endif %}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+
+{% if animal and animal.status == 'present' %}
+<p class="buttons">
+  <a class="button" href="{{ url_for('journal.new', direction='out') }}">Record departure or death</a>
+</p>
+{% endif %}
+{% endblock %}
