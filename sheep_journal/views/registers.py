@@ -28,10 +28,10 @@ def contact_form(contact_id=None):
         if not errors and data["ppn"]:
             other = store.contact_by_ppn(data["ppn"])
             if other and other["id"] != contact_id:
-                errors["ppn"] = f"{data['ppn']} is already registered as {other['name']}."
+                errors["ppn"] = f"{data['ppn']} är redan registrerat som {other['name']}."
         if not errors:
             store.save_contact(data, contact_id)
-            flash(f"{data['name']} saved.", "success")
+            flash(f"{data['name']} har sparats.", "success")
             return redirect(url_for(".contacts"))
         values = request.form
     else:
@@ -52,9 +52,9 @@ def tags():
         if not errors:
             added = store.add_tags(new_tags)
             skipped = len(new_tags) - added
-            message = f"{added} ear tag(s) added to stock."
+            message = f"{added} öronmärken tillagda i lagret."
             if skipped:
-                message += f" {skipped} number(s) were already in stock."
+                message += f" {skipped} nummer fanns redan i lagret."
             flash(message, "success")
             return redirect(url_for(".tags", species=request.form.get("species")))
         values = request.form
@@ -99,7 +99,7 @@ def herd_log():
 def herd_log_new():
     holding = store.get_holding()
     if holding is None:
-        flash("Set up your holding first.", "warning")
+        flash("Fyll i anläggningen först.", "warning")
         return redirect(url_for("main.holding"))
     errors = {}
     present = sorted(
@@ -115,7 +115,7 @@ def herd_log_new():
         events, errors = rules.parse_herd_event_form(request.form, keys)
         if not errors:
             store.insert_herd_events(events)
-            flash(f"{HERD_EVENT_KINDS[events[0]['kind']]} recorded.", "success")
+            flash(f"{HERD_EVENT_KINDS[events[0]['kind']]} registrerad.", "success")
             return redirect(url_for(".herd_log"))
         values = request.form
         selected = set(request.form.getlist("animal"))
@@ -137,8 +137,8 @@ def herd_log_delete(event_id):
     if event is None:
         abort(404)
     if event["kind"] in MEDICINE_KINDS:
-        flash("Medicine records must be kept for 5 years and can't be deleted.", "error")
+        flash("Läkemedelsanteckningar ska sparas i 5 år och kan inte tas bort.", "error")
     else:
         store.delete_herd_event(event_id)
-        flash("Log entry deleted.", "success")
+        flash("Anteckningen har tagits bort.", "success")
     return redirect(url_for(".herd_log"))

@@ -1,80 +1,80 @@
 {% extends "base.html" %}
 {% from "_macros.html" import field, select, warning_box, field_error %}
-{% block title %}Ear-tag lambs{% endblock %}
+{% block title %}Öronmärk lamm{% endblock %}
 {% block content %}
-<h1>Ear-tag lambs and kids (identifiering)</h1>
+<h1>Öronmärk lamm och killingar (identifiering)</h1>
 <p class="lede">
-  Record the individual numbers once lambs are tagged, at the latest 6 months after birth. Each animal gets a row
-  on the plus sheet with the identification date and joins the animal register. The balance doesn't change:
-  the lambs were counted when you recorded the birth.
+  För in individnumren när lammen är märkta, senast 6 månader efter födseln. Varje djur får en rad
+  på plusbladet med identifieringsdatum och läggs till i djurregistret. Saldot ändras inte:
+  lammen räknades när du förde in födseln.
 </p>
 
 <form method="post" class="form wide-form">
   {{ warning_box(warnings) }}
   <input type="hidden" name="rows" value="{{ rows }}">
   <div class="grid">
-    {{ field("event_date", "Identification date", values, errors, type="date", attrs='required max="' ~ today.isoformat() ~ '"') }}
-    {{ select("species", "Species", SPECIES, values, errors) }}
-    {{ field("birth_year", "Birth year", values, errors, type="number", attrs='required min="1990" max="' ~ today.year ~ '"') }}
-    {{ field("mother_id", "Mother (for all rows)", values, errors, attrs='list="mothers" autocomplete="off"',
-             help="Or give each lamb its own mother below.") }}
-    {{ field("breed", "Breed", values, errors) }}
+    {{ field("event_date", "Identifieringsdatum", values, errors, type="date", attrs='required max="' ~ today.isoformat() ~ '"') }}
+    {{ select("species", "Djurslag", SPECIES, values, errors) }}
+    {{ field("birth_year", "Födelseår", values, errors, type="number", attrs='required min="1990" max="' ~ today.year ~ '"') }}
+    {{ field("mother_id", "Mor (för alla rader)", values, errors, attrs='list="mothers" autocomplete="off"',
+             help="Eller ange mor för varje lamm nedan.") }}
+    {{ field("breed", "Ras", values, errors) }}
   </div>
 
   <p class="muted">
-    Unused tags in stock:
-    single {% for t in free_single[:8] %}{{ t.individual_number }}{% if not loop.last %}, {% endif %}{% else %}none{% endfor %}{% if free_single|length > 8 %} … ({{ free_single|length }}){% endif %} ·
-    double {% for t in free_double[:8] %}{{ t.individual_number }}{% if not loop.last %}, {% endif %}{% else %}none{% endfor %}{% if free_double|length > 8 %} … ({{ free_double|length }}){% endif %}.
-    Kept for breeding? Use a double tag.
+    Oanvända märken i lager:
+    enkla {% for t in free_single[:8] %}{{ t.individual_number }}{% if not loop.last %}, {% endif %}{% else %}inga{% endfor %}{% if free_single|length > 8 %} … ({{ free_single|length }}){% endif %} ·
+    dubbla {% for t in free_double[:8] %}{{ t.individual_number }}{% if not loop.last %}, {% endif %}{% else %}inga{% endfor %}{% if free_double|length > 8 %} … ({{ free_double|length }}){% endif %}.
+    Ska djuret behållas för avel? Använd dubbla märken.
   </p>
 
   <div class="table-wrap">
     <table class="tag-rows">
       <thead>
-        <tr><th>Individual number</th><th>Tag</th><th>Sex</th><th>Name</th><th>Mother (if different)</th><th>Keep ≥ 12 months</th></tr>
+        <tr><th>Individnummer</th><th>Märke</th><th>Kön</th><th>Namn</th><th>Mor (om en annan)</th><th>Livdjur (≥ 12 mån)</th></tr>
       </thead>
       <tbody>
       {% for i in range(rows) %}
         <tr>
           <td>
             <input name="number_{{ i }}" value="{{ values.get('number_' ~ i, '') }}" list="free-tags" autocomplete="off"
-                   aria-label="Individual number, row {{ i + 1 }}" {% if errors.get('number_' ~ i) %}aria-invalid="true"{% endif %}>
+                   aria-label="Individnummer, rad {{ i + 1 }}" {% if errors.get('number_' ~ i) %}aria-invalid="true"{% endif %}>
             {{ field_error('number_' ~ i, errors) }}
           </td>
           <td>
-            <select name="tag_type_{{ i }}" aria-label="Tag type, row {{ i + 1 }}">
-              <option value="">From stock</option>
+            <select name="tag_type_{{ i }}" aria-label="Märkestyp, rad {{ i + 1 }}">
+              <option value="">Enligt lager</option>
               {% for key, label in TAG_TYPES.items() %}<option value="{{ key }}" {% if values.get('tag_type_' ~ i) == key %}selected{% endif %}>{{ label }}</option>{% endfor %}
             </select>
           </td>
           <td>
-            <select name="sex_{{ i }}" aria-label="Sex, row {{ i + 1 }}">
+            <select name="sex_{{ i }}" aria-label="Kön, rad {{ i + 1 }}">
               <option value="">—</option>
               {% for key, label in SEXES.items() %}<option value="{{ key }}" {% if values.get('sex_' ~ i) == key %}selected{% endif %}>{{ label }}</option>{% endfor %}
             </select>
           </td>
-          <td><input name="name_{{ i }}" value="{{ values.get('name_' ~ i, '') }}" aria-label="Name, row {{ i + 1 }}"></td>
-          <td><input name="mother_{{ i }}" value="{{ values.get('mother_' ~ i, '') }}" list="mothers" autocomplete="off" aria-label="Mother, row {{ i + 1 }}"></td>
-          <td class="center"><input type="checkbox" name="breeding_{{ i }}" value="1" {% if values.get('breeding_' ~ i) %}checked{% endif %} aria-label="Keep for breeding, row {{ i + 1 }}"></td>
+          <td><input name="name_{{ i }}" value="{{ values.get('name_' ~ i, '') }}" aria-label="Namn, rad {{ i + 1 }}"></td>
+          <td><input name="mother_{{ i }}" value="{{ values.get('mother_' ~ i, '') }}" list="mothers" autocomplete="off" aria-label="Mor, rad {{ i + 1 }}"></td>
+          <td class="center"><input type="checkbox" name="breeding_{{ i }}" value="1" {% if values.get('breeding_' ~ i) %}checked{% endif %} aria-label="Livdjur, rad {{ i + 1 }}"></td>
         </tr>
       {% endfor %}
       </tbody>
     </table>
   </div>
   {% for key in ('birth_year', 'event_date') %}{{ field_error(key, errors) }}{% endfor %}
-  <p><a href="{{ url_for('journal.tag_lambs', rows=rows + 6) }}">More rows</a></p>
+  <p><a href="{{ url_for('journal.tag_lambs', rows=rows + 6) }}">Fler rader</a></p>
 
   <datalist id="free-tags">
-    {% for t in free_double %}<option value="{{ t.individual_number }}">double</option>{% endfor %}
-    {% for t in free_single %}<option value="{{ t.individual_number }}">single</option>{% endfor %}
+    {% for t in free_double %}<option value="{{ t.individual_number }}">dubbla</option>{% endfor %}
+    {% for t in free_single %}<option value="{{ t.individual_number }}">enkelt</option>{% endfor %}
   </datalist>
   <datalist id="mothers">
     {% for a in mothers %}<option value="{{ a.ref }}">{{ a.name or '' }}</option>{% endfor %}
   </datalist>
 
   <div class="buttons">
-    <button type="submit">{{ 'Save anyway' if warnings else 'Save' }}</button>
-    <a href="{{ url_for('main.dashboard') }}">Cancel</a>
+    <button type="submit">{{ 'Spara ändå' if warnings else 'Spara' }}</button>
+    <a href="{{ url_for('main.dashboard') }}">Avbryt</a>
   </div>
 </form>
 {% endblock %}

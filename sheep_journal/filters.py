@@ -41,7 +41,7 @@ def party(value):
         return f"{value} ({contact['name']})"
     holding = store.get_holding()
     if holding and value == holding["ppn"]:
-        return f"{value} (own holding)"
+        return f"{value} (egen anläggning)"
     return value
 
 

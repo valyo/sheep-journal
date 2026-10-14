@@ -54,26 +54,26 @@ def init_db():
 @click.command("init-db")
 def init_db_command():
     init_db()
-    click.echo("Database initialised.")
+    click.echo("Databasen är initierad.")
 
 
 @click.command("seed-demo")
 def seed_demo_command():
-    """Fill an empty database with a small demo herd."""
+    """Fyll en tom databas med en liten demobesättning."""
     from .demo import seed
 
     if seed():
-        click.echo("Demo data added.")
+        click.echo("Demodata har lagts till.")
     else:
-        click.echo("Database already has data; nothing added.")
+        click.echo("Databasen har redan data; inget lades till.")
 
 
 @click.command("import-xlsx")
 @click.argument("path", type=click.Path(exists=True, dir_okay=False))
-@click.option("--dry-run", is_flag=True, help="Show what would be imported without saving.")
-@click.option("--replace", is_flag=True, help="Delete the current journal and registers first, then import.")
+@click.option("--dry-run", is_flag=True, help="Visa vad som skulle importeras utan att spara.")
+@click.option("--replace", is_flag=True, help="Ta bort nuvarande journal och register först, importera sedan.")
 def import_xlsx_command(path, dry_run, replace):
-    """Import a stalljournal spreadsheet (the Google Sheets layout)."""
+    """Importera en stalljournal från kalkylark (Google Sheets-upplägget)."""
     from .importer import ImportRefused, import_workbook
 
     try:

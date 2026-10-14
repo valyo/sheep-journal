@@ -1,16 +1,17 @@
 {% extends "base.html" %}
 {% from "_macros.html" import field, select, textarea, checkbox, warning_box, field_error %}
-{% block title %}{% if entry %}Edit entry{% else %}New entry{% endif %}{% endblock %}
+{% block title %}{% if entry %}Ändra rad{% else %}Ny rad{% endif %}{% endblock %}
 {% block content %}
 {% if entry %}
-  <h1>Edit entry #{{ entry.id }} <small>{{ 'Plusblad' if direction == 'in' else 'Minusblad' }}</small></h1>
-  <p class="lede">Recorded {{ entry.created_at[:16]|replace('T', ' ') }}{% if entry.updated_at %}, last changed {{ entry.updated_at[:16]|replace('T', ' ') }}{% endif %}.</p>
+  <h1>Ändra rad #{{ entry.id }} <small>{{ 'Plusblad' if direction == 'in' else 'Minusblad' }}</small></h1>
+  <p class="lede">Införd {{ entry.created_at[:16]|replace('T', ' ') }}{% if entry.updated_at %}, senast ändrad {{ entry.updated_at[:16]|replace('T', ' ') }}{% endif %}.</p>
 {% else %}
-  <h1>{{ 'Animals in (plusblad)' if direction == 'in' else 'Animals out (minusblad)' }}</h1>
+  <h1>{{ 'Inkommande djur (plusblad)' if direction == 'in' else 'Utgående djur (minusblad)' }}</h1>
   <nav class="tabs">
-    <a href="{{ url_for('journal.new', direction='in') }}" {% if direction == 'in' %}aria-current="page"{% endif %}>+ Born or arrived</a>
-    <a href="{{ url_for('journal.new', direction='out') }}" {% if direction == 'out' %}aria-current="page"{% endif %}>− Left or died</a>
+    <a href="{{ url_for('journal.new', direction='in') }}" {% if direction == 'in' %}aria-current="page"{% endif %}>+ Födda eller inkomna</a>
+    <a href="{{ url_for('journal.new', direction='out') }}" {% if direction == 'out' %}aria-current="page"{% endif %}>− Utgångna eller döda</a>
   </nav>
+  {% if direction == 'in' %}<p class="lede">Ska du öronmärka flera lamm på en gång? Använd <a href="{{ url_for('journal.tag_lambs') }}">Öronmärk lamm</a>.</p>{% endif %}
 {% endif %}
 
 <form method="post" class="form" id="entry-form" data-own-ppn="{{ holding.ppn }}">
@@ -18,108 +19,108 @@
 
   <div class="grid">
     <div class="field{% if errors.get('event_type') %} has-error{% endif %}">
-      <label for="event_type">What happened?</label>
+      <label for="event_type">Vad hände?</label>
       <select id="event_type" name="event_type" required>
-        <option value="">Choose…</option>
+        <option value="">Välj …</option>
         {% for key, ev in EVENT_TYPES.items() if ev.direction == direction %}
           <option value="{{ key }}"
                   data-movement="{{ 1 if ev.movement else 0 }}"
                   data-transport="{{ 1 if ev.transport else 0 }}"
                   data-direction="{{ ev.direction }}"
-                  {% if values.get('event_type') == key %}selected{% endif %}>{{ ev.label }} ({{ ev.label_sv }})</option>
+                  {% if values.get('event_type') == key %}selected{% endif %}>{{ ev.label }}</option>
         {% endfor %}
       </select>
       {{ field_error('event_type', errors) }}
     </div>
-    {{ field("event_date", "Date", values, errors, type="date", attrs='required max="' ~ today.isoformat() ~ '"',
-             help="The day the animals arrived or left. For births: the birth date, or the day the lambs were ear-tagged.") }}
-    {{ select("species", "Species", SPECIES, values, errors) }}
+    {{ field("event_date", "Datum", values, errors, type="date", attrs='required max="' ~ today.isoformat() ~ '"',
+             help="Dagen djuren kom eller lämnade. För födda: födelsedatum eller dagen lammen öronmärktes.") }}
+    {{ select("species", "Djurslag", SPECIES, values, errors) }}
   </div>
 
   <fieldset>
-    <legend>Animal ID (from the ear tag)</legend>
+    <legend>Djurets ID-nummer (från öronmärket)</legend>
     <div class="grid">
-      {{ field("ppn", "PPN on the ear tag", values, errors, attrs='required autocomplete="off"',
-               help="The birth holding's number. Animals from another EU country: the country code, e.g. DK.") }}
-      {{ field("individual_number", "Individual number", values, errors, attrs='autocomplete="off"',
-               help="Leave empty to record a group identified only by PPN.") }}
-      {{ field("count", "Number of animals", values, errors, type="number", attrs='min="1"',
-               help="1 for an individually numbered animal.") }}
-      {{ checkbox("breeding", "Livdjur: will live 12 months or longer", values,
-                  help="These animals must be recorded individually. Slaughter lambs may be recorded as a group.") }}
+      {{ field("ppn", "PPN på öronmärket", values, errors, attrs='required autocomplete="off"',
+               help="Födelsegårdens nummer. Djur från ett annat EU-land: landskoden, t.ex. DK.") }}
+      {{ field("individual_number", "Individnummer", values, errors, attrs='autocomplete="off"',
+               help="Lämna tomt för att föra in en grupp som bara identifieras med PPN.") }}
+      {{ field("count", "Antal djur", values, errors, type="number", attrs='min="1"',
+               help="1 för ett djur med individnummer.") }}
+      {{ checkbox("breeding", "Livdjur: ska leva 12 månader eller längre", values,
+                  help="Livdjur ska journalföras individuellt. Slaktlamm får föras in gruppvis.") }}
     </div>
   </fieldset>
 
   <fieldset data-show="birth">
-    <legend>Birth</legend>
+    <legend>Födsel</legend>
     <div class="grid">
-      {{ field("mother_id", "Mother", values, errors, attrs='list="mothers" autocomplete="off"',
-               help="The ewe's ear tag, e.g. 34567-19011.") }}
-      {{ field("males", "Of which male", values, errors, type="number", attrs='min="0"') }}
-      {{ field("females", "Of which female", values, errors, type="number", attrs='min="0"') }}
+      {{ field("mother_id", "Mor", values, errors, attrs='list="mothers" autocomplete="off"',
+               help="Tackans öronmärke, t.ex. 34567-19011.") }}
+      {{ field("males", "Varav hanar", values, errors, type="number", attrs='min="0"') }}
+      {{ field("females", "Varav honor", values, errors, type="number", attrs='min="0"') }}
     </div>
   </fieldset>
 
   <fieldset>
-    <legend>About the animal</legend>
+    <legend>Om djuret</legend>
     <div class="grid">
-      {{ field("birth_year", "Birth year", values, errors, type="number", attrs='min="1990" max="' ~ today.year ~ '"',
-               help="Required for births.") }}
-      {{ select("sex", "Sex", SEXES, values, errors, blank="—") }}
-      {{ field("breed", "Breed", values, errors, help="Only needed if it differs from the holding's main breed" ~ (" (" ~ holding.main_breed ~ ")" if holding.main_breed else "") ~ ".") }}
-      {{ field("genotype", "Genotype", values, errors, help="If known, e.g. scrapie genotype.") }}
-      {{ field("previous_id", "Previous ID", values, errors, help="The original number if the animal has been re-tagged.") }}
-      {{ checkbox("electronic_tag", "Has an electronic ear tag", values) }}
+      {{ field("birth_year", "Födelseår", values, errors, type="number", attrs='min="1990" max="' ~ today.year ~ '"',
+               help="Krävs för födda.") }}
+      {{ select("sex", "Kön", SEXES, values, errors, blank="—") }}
+      {{ field("breed", "Ras", values, errors, help="Behövs bara om den skiljer sig från anläggningens huvudsakliga ras" ~ (" (" ~ holding.main_breed ~ ")" if holding.main_breed else "") ~ ".") }}
+      {{ field("genotype", "Genotyp", values, errors, help="Om den är känd, t.ex. scrapiegenotyp.") }}
+      {{ field("previous_id", "Tidigare ID", values, errors, help="Det ursprungliga numret om djuret har märkts om.") }}
+      {{ checkbox("electronic_tag", "Har elektroniskt öronmärke", values) }}
     </div>
   </fieldset>
 
   <fieldset data-show="movement">
-    <legend id="counterparty-legend">{{ 'Supplier (leverantör)' if direction == 'in' else 'Recipient (mottagare)' }}</legend>
+    <legend id="counterparty-legend">{{ 'Leverantör' if direction == 'in' else 'Mottagare' }}</legend>
     <div class="grid">
-      {{ field("counterparty", "PPN of the other holding, or name and address", values, errors,
+      {{ field("counterparty", "Den andra produktionsplatsens PPN, eller namn och adress", values, errors,
                attrs='list="contacts" autocomplete="off"',
-               help="For slaughter: the slaughterhouse's PPN. Known holdings are in Contacts.") }}
+               help="Vid slakt: slakteriets PPN. Kända gårdar finns under Kontakter.") }}
     </div>
   </fieldset>
 
   <fieldset data-show="transport">
-    <legend>Transporter (transportör)</legend>
+    <legend>Transportör</legend>
     <div class="grid">
-      {{ field("driver_name", "Driver's name", values, errors) }}
-      {{ field("vehicle_reg", "Vehicle registration number", values, errors,
-               help="Of the vehicle part carrying the animals, e.g. the trailer.") }}
+      {{ field("driver_name", "Chaufförens namn", values, errors) }}
+      {{ field("vehicle_reg", "Registreringsnummer", values, errors,
+               help="För den del av fordonet som djuren finns i, t.ex. släpet.") }}
     </div>
   </fieldset>
 
   <div class="grid">
-    {{ textarea("cause_of_death", "Cause of death", values, errors, show="death",
-                help="Required. Keep documentation about dead animals for 5 years.") }}
-    {{ textarea("notes", "Notes (övrigt)", values, errors) }}
+    {{ textarea("cause_of_death", "Dödsorsak", values, errors, show="death",
+                help="Krävs. Spara dokumentation om döda djur i 5 år.") }}
+    {{ textarea("notes", "Övrigt", values, errors) }}
   </div>
 
   <datalist id="contacts">
     {% for c in contacts if c.ppn %}<option value="{{ c.ppn }}">{{ c.name }}{% if c.keeper %} – {{ c.keeper }}{% endif %}</option>{% endfor %}
   </datalist>
   <datalist id="mothers">
-    {% for a in mothers %}<option value="{{ a.ref }}">{{ a.name or '' }}{% if a.status != 'present' %} (not on holding){% endif %}</option>{% endfor %}
+    {% for a in mothers %}<option value="{{ a.ref }}">{{ a.name or '' }}{% if a.status != 'present' %} (inte på anläggningen){% endif %}</option>{% endfor %}
   </datalist>
 
   <div class="buttons">
-    <button type="submit">{{ 'Save anyway' if warnings else 'Save' }}</button>
-    {% if not entry %}<button type="submit" name="add_another" value="1" class="secondary">Save and add another</button>{% endif %}
-    <a href="{{ url_for('journal.index') }}">Cancel</a>
+    <button type="submit">{{ 'Spara ändå' if warnings else 'Spara' }}</button>
+    {% if not entry %}<button type="submit" name="add_another" value="1" class="secondary">Spara och lägg till en till</button>{% endif %}
+    <a href="{{ url_for('journal.index') }}">Avbryt</a>
   </div>
 </form>
 
 {% if entry %}
 <form method="post" action="{{ url_for('journal.void', entry_id=entry.id) }}" class="form void-form">
-  <h2>Void this entry</h2>
-  <p class="muted">Entries are never deleted: the rules require records to be kept for 5 years. A voided entry is crossed out and no longer counts.</p>
+  <h2>Makulera raden</h2>
+  <p class="muted">Rader tas aldrig bort: uppgifterna ska sparas i 5 år. En makulerad rad stryks över och räknas inte längre.</p>
   <div class="field wide">
-    <label for="reason">Reason</label>
-    <input id="reason" name="reason" required placeholder="e.g. entered twice">
+    <label for="reason">Orsak</label>
+    <input id="reason" name="reason" required placeholder="t.ex. införd två gånger">
   </div>
-  <button type="submit" class="danger">Void entry</button>
+  <button type="submit" class="danger">Makulera</button>
 </form>
 {% endif %}
 {% endblock %}

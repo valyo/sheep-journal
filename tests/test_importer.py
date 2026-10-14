@@ -142,10 +142,10 @@ def test_import(app, workbook_path):
         assert [t["individual_number"] for t in store.available_tags("sheep")] == ["00052"]
         assert store.list_herd_events()[0]["kind"] == "shearing"
 
-    assert "running-total rows used only as checks: 2" in report.lower()
-    assert "minus sheet" in report
-    assert "without individual numbers" in report
-    assert "3 animal(s) with PPN 22222 (Grannby)" in report
+    assert "använda endast som kontroll: 2" in report
+    assert "minusbladet" in report
+    assert "utan individnummer" in report
+    assert "3 djur med PPN 22222 (Grannby)" in report
     assert "11111-00005" in report
     assert "XXX 000" in report
 
@@ -153,7 +153,7 @@ def test_import(app, workbook_path):
 def test_dry_run_saves_nothing(app, workbook_path):
     with app.app_context():
         report = import_workbook(workbook_path, dry_run=True)
-        assert "Dry run" in report
+        assert "Provkörning" in report
         assert store.entry_count() == 0 and store.get_holding() is None
 
 

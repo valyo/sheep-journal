@@ -6,11 +6,11 @@ from ..constants import holding_species
 bp = Blueprint("animals", __name__, url_prefix="/animals")
 
 STATUSES = {
-    "present": "On the holding",
-    "away": "Temporarily away",
-    "gone": "Left / dead",
-    "unrecorded": "Not in the journal",
-    "all": "All",
+    "present": "På anläggningen",
+    "away": "Tillfälligt ute",
+    "gone": "Utgått / döda",
+    "unrecorded": "Saknas i journalen",
+    "all": "Alla",
 }
 
 
@@ -52,19 +52,19 @@ def _form(animal_id=None):
         if not errors:
             existing = store.animal_by_key(data["species"], data["ppn"], data["individual_number"])
             if existing and existing["id"] != animal_id:
-                errors["individual_number"] = "Another animal in the register already has this number."
+                errors["individual_number"] = "Ett annat djur i registret har redan det här numret."
         if not errors:
             if animal_id is not None:
                 current = store.get_animal(animal_id)
                 if (current["species"], current["ppn"], current["individual_number"]) != (
                         data["species"], data["ppn"], data["individual_number"]):
                     errors["individual_number"] = (
-                        "The ear tag number can't be changed here: it links the animal to its "
-                        "journal rows. Record re-tagging in the journal instead."
+                        "Öronmärkesnumret kan inte ändras här: det kopplar djuret till dess "
+                        "rader i journalen. För in ommärkning i journalen i stället."
                     )
         if not errors:
             store.save_animal(data)
-            flash("Animal details saved.", "success")
+            flash("Djuruppgifterna har sparats.", "success")
             return redirect(url_for(
                 ".detail", species=data["species"], ppn=data["ppn"],
                 individual_number=data["individual_number"],

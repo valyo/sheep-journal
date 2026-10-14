@@ -1,22 +1,22 @@
 {% extends "base.html" %}
 {% from "_macros.html" import field, select, textarea %}
-{% block title %}{% if contact %}Edit contact{% else %}Add contact{% endif %}{% endblock %}
+{% block title %}{% if contact %}Ändra kontakt{% else %}Lägg till kontakt{% endif %}{% endblock %}
 {% block content %}
-<h1>{% if contact %}{{ contact.name }}{% else %}Add contact{% endif %}</h1>
+<h1>{% if contact %}{{ contact.name }}{% else %}Lägg till kontakt{% endif %}</h1>
 <form method="post" class="form">
   <div class="grid">
-    {{ field("ppn", "PPN", values, errors, help="Production site number, e.g. SE 234567. Leave empty for buyers without a holding.") }}
-    {{ field("name", "Farm or business name", values, errors, attrs="required") }}
-    {{ select("kind", "Type", CONTACT_KINDS, values, errors) }}
-    {{ field("keeper", "Keeper / contact person", values, errors) }}
-    {{ field("phone", "Phone", values, errors, type="tel") }}
-    {{ field("email", "Email", values, errors, type="email") }}
-    {{ textarea("address", "Address", values, errors) }}
-    {{ textarea("notes", "Notes", values, errors) }}
+    {{ field("ppn", "PPN", values, errors, help="Produktionsplatsnummer, t.ex. SE 234567. Lämna tomt för köpare utan produktionsplats.") }}
+    {{ field("name", "Gårdens eller företagets namn", values, errors, attrs="required") }}
+    {{ select("kind", "Typ", CONTACT_KINDS, values, errors) }}
+    {{ field("keeper", "Djurhållare / kontaktperson", values, errors) }}
+    {{ field("phone", "Telefon", values, errors, type="tel") }}
+    {{ field("email", "E-post", values, errors, type="email") }}
+    {{ textarea("address", "Adress", values, errors) }}
+    {{ textarea("notes", "Anteckningar", values, errors) }}
   </div>
   <div class="buttons">
-    <button type="submit">Save</button>
-    <a href="{{ url_for('registers.contacts') }}">Cancel</a>
+    <button type="submit">Spara</button>
+    <a href="{{ url_for('registers.contacts') }}">Avbryt</a>
   </div>
 </form>
 {% endblock %}

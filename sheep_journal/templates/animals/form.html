@@ -1,56 +1,56 @@
 {% extends "base.html" %}
 {% from "_macros.html" import field, select, textarea, checkbox %}
-{% block title %}{% if animal_id %}Edit animal{% else %}Add animal{% endif %}{% endblock %}
+{% block title %}{% if animal_id %}Ändra djur{% else %}Lägg till djur{% endif %}{% endblock %}
 {% block content %}
-<h1>{% if animal_id %}Edit animal details{% else %}Add animal details{% endif %}</h1>
-<p class="lede">These details are for you and for breeding records. Where the animal is, and when it came or left, is recorded in the journal.</p>
+<h1>{% if animal_id %}Ändra djuruppgifter{% else %}Lägg till djuruppgifter{% endif %}</h1>
+<p class="lede">Uppgifterna är för dig och för avelsarbetet. Var djuret finns, och när det kom eller lämnade, förs in i journalen.</p>
 
 <form method="post" class="form">
   <fieldset>
-    <legend>Ear tag</legend>
+    <legend>Öronmärke</legend>
     <div class="grid">
-      {{ select("species", "Species", SPECIES, values, errors) }}
-      {{ field("ppn", "PPN on the tag", values, errors, attrs="required") }}
-      {{ field("individual_number", "Individual number", values, errors, attrs="required") }}
-      {{ field("tag_year", "Year on the tag", values, errors, type="number", attrs='min="1990"') }}
-      {{ select("tag_type", "Tags", TAG_TYPES, values, errors, blank="—") }}
-      {{ field("tag_model", "Tag model", values, errors, help="e.g. micro") }}
-      {{ field("tag_colour", "Tag colour", values, errors) }}
-      {{ checkbox("electronic_tag", "Electronic ear tag", values) }}
+      {{ select("species", "Djurslag", SPECIES, values, errors) }}
+      {{ field("ppn", "PPN på märket", values, errors, attrs="required") }}
+      {{ field("individual_number", "Individnummer", values, errors, attrs="required") }}
+      {{ field("tag_year", "Årtal på märket", values, errors, type="number", attrs='min="1990"') }}
+      {{ select("tag_type", "Märken", TAG_TYPES, values, errors, blank="—") }}
+      {{ field("tag_model", "Märkesmodell", values, errors, help="t.ex. micro") }}
+      {{ field("tag_colour", "Märkesfärg", values, errors) }}
+      {{ checkbox("electronic_tag", "Elektroniskt öronmärke", values) }}
     </div>
   </fieldset>
   <fieldset>
-    <legend>The animal</legend>
+    <legend>Djuret</legend>
     <div class="grid">
-      {{ field("name", "Name", values, errors) }}
-      {{ select("sex", "Sex", SEXES, values, errors, blank="—") }}
-      {{ field("birth_date", "Birth date", values, errors, help="YYYY-MM-DD, or YYYY-MM if the day is unknown") }}
-      {{ field("birth_year", "Birth year", values, errors, type="number") }}
-      {{ field("breed", "Breed", values, errors) }}
-      {{ field("colour", "Colour", values, errors) }}
-      {{ field("markings", "Markings (kännetecken)", values, errors) }}
-      {{ field("elite_no", "Elitlamm reg. no.", values, errors) }}
-      {{ field("elite_code", "Elitlamm code", values, errors) }}
+      {{ field("name", "Namn", values, errors) }}
+      {{ select("sex", "Kön", SEXES, values, errors, blank="—") }}
+      {{ field("birth_date", "Födelsedatum", values, errors, help="ÅÅÅÅ-MM-DD, eller ÅÅÅÅ-MM om dagen är okänd") }}
+      {{ field("birth_year", "Födelseår", values, errors, type="number") }}
+      {{ field("breed", "Ras", values, errors) }}
+      {{ field("colour", "Färg", values, errors) }}
+      {{ field("markings", "Kännetecken", values, errors) }}
+      {{ field("elite_no", "Elitlamm reg.nr", values, errors) }}
+      {{ field("elite_code", "Elitlammskod", values, errors) }}
     </div>
   </fieldset>
   <fieldset>
-    <legend>Parents</legend>
+    <legend>Föräldrar</legend>
     <div class="grid">
-      {{ field("mother_id", "Mother's ear tag", values, errors, attrs='list="mothers" autocomplete="off"') }}
-      {{ field("mother_name", "Mother's name", values, errors) }}
-      {{ field("mother_elite_no", "Mother's elitlamm no.", values, errors) }}
-      {{ field("father_id", "Father's ear tag", values, errors, help="Or a description if unknown") }}
-      {{ field("father_name", "Father's name", values, errors) }}
-      {{ field("father_elite_no", "Father's elitlamm no.", values, errors) }}
+      {{ field("mother_id", "Moderns öronmärke", values, errors, attrs='list="mothers" autocomplete="off"') }}
+      {{ field("mother_name", "Moderns namn", values, errors) }}
+      {{ field("mother_elite_no", "Moderns elitlamm-nr", values, errors) }}
+      {{ field("father_id", "Faderns öronmärke", values, errors, help="Eller en beskrivning om den är okänd") }}
+      {{ field("father_name", "Faderns namn", values, errors) }}
+      {{ field("father_elite_no", "Faderns elitlamm-nr", values, errors) }}
     </div>
   </fieldset>
-  {{ textarea("notes", "Notes", values, errors) }}
+  {{ textarea("notes", "Anteckningar", values, errors) }}
   <datalist id="mothers">
     {% for m in mothers %}<option value="{{ m.ref }}">{{ m.name or '' }}</option>{% endfor %}
   </datalist>
   <div class="buttons">
-    <button type="submit">Save</button>
-    <a href="{{ url_for('animals.index') }}">Cancel</a>
+    <button type="submit">Spara</button>
+    <a href="{{ url_for('animals.index') }}">Avbryt</a>
   </div>
 </form>
 {% endblock %}

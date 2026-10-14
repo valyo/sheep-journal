@@ -1,31 +1,31 @@
 {% extends "base.html" %}
 {% from "_macros.html" import field, select, textarea %}
-{% block title %}December count{% endblock %}
+{% block title %}Decemberräkning{% endblock %}
 {% block content %}
-<h1>December count (får- och geträkning)</h1>
-<p class="lede">Every year, count all sheep and goats on the holding on one day between 1 and 31 December and report the number to Jordbruksverket. Record the count and the date you reported it here.</p>
+<h1>Får- och geträkning i december</h1>
+<p class="lede">Varje år ska du räkna alla får och getter på anläggningen en dag mellan 1 och 31 december och rapportera antalet till Jordbruksverket. För in räkningen och datumet då du rapporterade här.</p>
 
 <form method="post" class="form">
   <div class="grid">
-    {{ field("year", "Year", values, errors, type="number", attrs='min="2000" max="2100" required') }}
-    {{ select("species", "Animals", SPECIES, values, errors) }}
-    {{ field("count_date", "Count date", values, errors, type="date", attrs="required") }}
-    {{ field("total", "Total counted", values, errors, type="number", attrs='min="0" required') }}
-    {{ field("ewes", "Females (tackor / getter)", values, errors, type="number", attrs='min="0"', help="Split by females, males and young if Jordbruksverket asks for it.") }}
-    {{ field("rams", "Males (baggar / bockar)", values, errors, type="number", attrs='min="0"') }}
-    {{ field("lambs", "Young (lamm / killingar)", values, errors, type="number", attrs='min="0"') }}
-    {{ field("reported_on", "Reported to Jordbruksverket on", values, errors, type="date") }}
-    {{ textarea("notes", "Notes", values, errors) }}
+    {{ field("year", "År", values, errors, type="number", attrs='min="2000" max="2100" required') }}
+    {{ select("species", "Djurslag", SPECIES, values, errors) }}
+    {{ field("count_date", "Datum för räkningen", values, errors, type="date", attrs="required") }}
+    {{ field("total", "Totalt antal", values, errors, type="number", attrs='min="0" required') }}
+    {{ field("ewes", "Honor (tackor / getter)", values, errors, type="number", attrs='min="0"', help="Dela upp på honor, hanar och ungdjur om Jordbruksverket ber om det.") }}
+    {{ field("rams", "Hanar (baggar / bockar)", values, errors, type="number", attrs='min="0"') }}
+    {{ field("lambs", "Ungdjur (lamm / killingar)", values, errors, type="number", attrs='min="0"') }}
+    {{ field("reported_on", "Rapporterad till Jordbruksverket", values, errors, type="date") }}
+    {{ textarea("notes", "Anteckningar", values, errors) }}
   </div>
-  <button type="submit">Save count</button>
+  <button type="submit">Spara räkningen</button>
 </form>
 
 {% if rows %}
-<h2>Recorded counts</h2>
+<h2>Registrerade räkningar</h2>
 <div class="table-wrap">
 <table>
   <thead>
-    <tr><th>Year</th><th>Animals</th><th>Counted on</th><th class="num">Total</th><th class="num">F / M / young</th><th class="num">Journal says</th><th>Reported</th><th></th></tr>
+    <tr><th>År</th><th>Djurslag</th><th>Räknat</th><th class="num">Totalt</th><th class="num">Honor / hanar / ungdjur</th><th class="num">Enligt journalen</th><th>Rapporterad</th><th></th></tr>
   </thead>
   <tbody>
   {% for c, journal in rows %}
@@ -35,9 +35,9 @@
       <td class="nowrap">{{ c.count_date }}</td>
       <td class="num">{{ c.total }}</td>
       <td class="num">{{ c.ewes if c.ewes is not none else '–' }} / {{ c.rams if c.rams is not none else '–' }} / {{ c.lambs if c.lambs is not none else '–' }}</td>
-      <td class="num">{{ journal }}{% if journal != c.total %} <span class="badge badge-warning" title="The journal balance on the count date differs from the count. Check for missing entries.">differs</span>{% endif %}</td>
+      <td class="num">{{ journal }}{% if journal != c.total %} <span class="badge badge-warning" title="Journalens saldo på räkningsdagen skiljer sig från räkningen. Kontrollera om rader saknas.">avviker</span>{% endif %}</td>
       <td class="nowrap">{{ c.reported_on or '—' }}</td>
-      <td><a href="{{ url_for('main.counts', year=c.year, species=c.species) }}">Edit</a></td>
+      <td><a href="{{ url_for('main.counts', year=c.year, species=c.species) }}">Ändra</a></td>
     </tr>
   {% endfor %}
   </tbody>

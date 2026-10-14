@@ -11,7 +11,7 @@ FILTERS = ("direction", "species", "year", "event_type", "q", "flag")
 def _holding_or_redirect():
     holding = store.get_holding()
     if holding is None:
-        flash("Set up your holding first: the journal needs your production site number (PPN).", "warning")
+        flash("Fyll i anläggningen först: journalen behöver ditt produktionsplatsnummer (PPN).", "warning")
     return holding
 
 
@@ -76,7 +76,7 @@ def new():
     if request.method == "POST":
         saved, errors, warnings = _save(holding)
         if saved:
-            flash(f"Saved: {EVENT_TYPES[saved['event_type']].label}.", "success")
+            flash(f"Sparat: {EVENT_TYPES[saved['event_type']].label}.", "success")
             if "add_another" in request.form:
                 return redirect(url_for(
                     ".new",
@@ -110,7 +110,7 @@ def edit(entry_id):
     if entry is None:
         abort(404)
     if entry["voided_at"]:
-        flash("Voided entries can't be changed.", "warning")
+        flash("Makulerade rader kan inte ändras.", "warning")
         return redirect(url_for(".index"))
     holding = _holding_or_redirect()
     if holding is None:
@@ -123,7 +123,7 @@ def edit(entry_id):
             abort(400)
         saved, errors, warnings = _save(holding, entry_id)
         if saved:
-            flash("Entry updated.", "success")
+            flash("Raden har uppdaterats.", "success")
             return redirect(url_for(".index"))
         values = request.form
     else:
@@ -142,10 +142,10 @@ def void(entry_id):
         abort(404)
     reason = (request.form.get("reason") or "").strip()
     if not reason:
-        flash("Give a reason for voiding the entry.", "error")
+        flash("Ange varför raden makuleras.", "error")
         return redirect(url_for(".edit", entry_id=entry_id))
     store.void_entry(entry_id, reason)
-    flash("Entry voided. It stays in the journal, crossed out.", "success")
+    flash("Raden är makulerad. Den finns kvar i journalen, överstruken.", "success")
     return redirect(url_for(".index"))
 
 
@@ -180,9 +180,9 @@ def recruit():
         })
         errors = {**out_errors, **in_errors}
         if not individual:
-            errors["individual_number"] = "Enter the animal's new individual number."
+            errors["individual_number"] = "Ange djurets nya individnummer."
         if not form.get("birth_year"):
-            errors["birth_year"] = "Enter the birth year."
+            errors["birth_year"] = "Ange födelseår."
         if not errors:
             for entry in (out_entry, in_entry):
                 entry_errors, entry_warnings = rules.validate_entry(entry, holding, today)
@@ -190,7 +190,7 @@ def recruit():
                 warnings += [w for w in entry_warnings if w not in warnings]
         if not errors and _acknowledged(warnings):
             store.insert_entries([out_entry, in_entry])
-            flash(f"Animal {holding['ppn']}-{individual} is now recorded individually.", "success")
+            flash(f"Djur {holding['ppn']}-{individual} är nu individregistrerat.", "success")
             return redirect(url_for(".index"))
         values = form
     else:
@@ -229,7 +229,7 @@ def tag_lambs():
             if not number:
                 continue
             if number in numbers:
-                errors[f"number_{i}"] = f"{number} is entered twice."
+                errors[f"number_{i}"] = f"{number} är angivet två gånger."
                 continue
             numbers.append(number)
             entry, entry_errors = rules.parse_entry_form({
@@ -252,16 +252,16 @@ def tag_lambs():
             entries.append((i, entry, tag_type))
 
         if not entries and not errors:
-            errors["number_0"] = "Enter the individual number of at least one animal."
+            errors["number_0"] = "Ange individnummer för minst ett djur."
 
         if not errors and entries[0][1]["birth_year"]:
             born, tagged = store.births_and_tagged(
                 entries[0][1]["species"], holding["ppn"], entries[0][1]["birth_year"])
             if tagged + len(entries) > born:
                 warnings.append(
-                    f"The journal records {born} born in {entries[0][1]['birth_year']} and "
-                    f"{tagged} already tagged, so {len(entries)} more is too many. "
-                    "Record the missing births first."
+                    f"Journalen har {born} födda {entries[0][1]['birth_year']} och "
+                    f"{tagged} redan märkta, så {len(entries)} till är för många. "
+                    "För in de saknade födslarna först."
                 )
         if not errors:
             has_stock = bool(store.list_tags())
@@ -273,10 +273,10 @@ def tag_lambs():
                 label = f"{holding['ppn']}-{entry['individual_number']}"
                 stock_tag = store.get_tag(entry["species"], entry["individual_number"])
                 if has_stock and stock_tag is None:
-                    warnings.append(f"Tag {label} is not in your ear tag stock.")
+                    warnings.append(f"Märke {label} finns inte i ditt märkeslager.")
                 elif stock_tag and tag_type and stock_tag["tag_type"] != tag_type:
                     warnings.append(
-                        f"Tag {label} is a {TAG_TYPES[stock_tag['tag_type']].lower()} in your stock."
+                        f"Märke {label} är registrerat som {TAG_TYPES[stock_tag['tag_type']].lower()} i lagret."
                     )
                 effective_type = tag_type or (stock_tag["tag_type"] if stock_tag else None)
                 if entry["breeding"] and effective_type == "single":
@@ -302,7 +302,7 @@ def tag_lambs():
             for animal in animals:
                 store.merge_animal(animal, commit=False)
             store.commit()
-            flash(f"{len(entries)} animal(s) ear-tagged and added to the register.", "success")
+            flash(f"{len(entries)} djur öronmärkta och tillagda i djurregistret.", "success")
             return redirect(url_for("animals.index"))
         values = form
     else:

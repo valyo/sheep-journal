@@ -1,26 +1,26 @@
 {% extends "base.html" %}
-{% block title %}Herd log{% endblock %}
+{% block title %}Skötsel{% endblock %}
 {% block content %}
 <div class="heading-row">
-  <h1>Herd log</h1>
-  <a class="button" href="{{ url_for('registers.herd_log_new') }}">Log an event</a>
+  <h1>Skötsel och behandlingar</h1>
+  <a class="button" href="{{ url_for('registers.herd_log_new') }}">Ny anteckning</a>
 </div>
-<p class="lede">Shearing, treatments, vaccinations and other work that isn't a movement. Medicine records
-  (product, dose, withdrawal period) must be kept for 5 years.</p>
+<p class="lede">Klippning, behandlingar, vaccinationer och annat arbete som inte är förflyttningar. Läkemedelsanteckningar
+  (preparat, dos, karenstid) ska sparas i 5 år.</p>
 
 <form method="get" class="filters">
-  <select name="kind" aria-label="Kind">
-    <option value="">All kinds</option>
+  <select name="kind" aria-label="Typ">
+    <option value="">Alla typer</option>
     {% for key, label in HERD_EVENT_KINDS.items() %}<option value="{{ key }}" {% if kind == key %}selected{% endif %}>{{ label }}</option>{% endfor %}
   </select>
-  <input name="year" value="{{ year or '' }}" placeholder="Year" inputmode="numeric" aria-label="Year" size="6">
-  <button type="submit">Filter</button>
+  <input name="year" value="{{ year or '' }}" placeholder="År" inputmode="numeric" aria-label="År" size="6">
+  <button type="submit">Filtrera</button>
 </form>
 
 {% if events %}
 <div class="table-wrap">
 <table>
-  <thead><tr><th>Date</th><th>What</th><th>Animal</th><th>Product / dose</th><th>Withdrawal until</th><th>Notes</th><th></th></tr></thead>
+  <thead><tr><th>Datum</th><th>Vad</th><th>Djur</th><th>Preparat / dos</th><th>Karenstid t.o.m.</th><th>Anteckningar</th><th></th></tr></thead>
   <tbody>
   {% for e in events %}
     {% set a = animals.get((e.species, e.ppn, e.individual_number)) if e.individual_number else none %}
@@ -37,8 +37,8 @@
       <td>{{ e.description or '' }}{% if e.notes %} {{ e.notes }}{% endif %}</td>
       <td>
         {% if e.kind not in MEDICINE_KINDS %}
-        <form method="post" action="{{ url_for('registers.herd_log_delete', event_id=e.id) }}" onsubmit="return confirm('Delete this log entry?')">
-          <button type="submit" class="link">Delete</button>
+        <form method="post" action="{{ url_for('registers.herd_log_delete', event_id=e.id) }}" onsubmit="return confirm('Ta bort anteckningen?')">
+          <button type="submit" class="link">Ta bort</button>
         </form>
         {% endif %}
       </td>
@@ -48,6 +48,6 @@
 </table>
 </div>
 {% else %}
-<p class="muted">Nothing logged{% if kind or year %} for this filter{% endif %}.</p>
+<p class="muted">Inget antecknat{% if kind or year %} för det här filtret{% endif %}.</p>
 {% endif %}
 {% endblock %}

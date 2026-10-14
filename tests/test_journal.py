@@ -15,7 +15,7 @@ def entries(app):
 
 def test_dashboard_asks_for_holding_first(client):
     response = client.get("/")
-    assert b"Set up your holding" in response.data
+    assert "Fyll i uppgifterna om anläggningen".encode() in response.data
 
 
 def test_new_entry_requires_holding(client):
@@ -37,37 +37,37 @@ def test_birth_updates_balance(app, client, holding):
 
 def test_birth_requires_birth_year(client, holding):
     response = add(client, event_type="birth", ppn="12345", count="3")
-    assert b"Births must be recorded with the birth year" in response.data
+    assert "Födslar ska journalföras med födelseår".encode() in response.data
 
 
 def test_death_requires_cause(client, holding):
     add(client, event_type="purchase", ppn="5554", individual_number="00012",
         breeding="1", counterparty="5554")
     response = add(client, event_type="death", ppn="5554", individual_number="00012")
-    assert b"Record the cause of death" in response.data
+    assert "Ange dödsorsak".encode() in response.data
 
 
 def test_breeding_animal_must_be_individual(client, holding):
     response = add(client, event_type="purchase", ppn="5554", count="3",
                    breeding="1", counterparty="5554")
-    assert b"must be recorded individually" in response.data
+    assert "ska journalföras individuellt".encode() in response.data
 
 
 def test_movement_requires_counterparty(client, holding):
     response = add(client, event_type="purchase", ppn="5554", count="3")
-    assert b"Enter the supplier" in response.data
+    assert "Ange leverantör".encode() in response.data
 
 
 def test_individual_row_has_count_one(client, holding):
     response = add(client, event_type="purchase", ppn="5554", individual_number="1",
                    count="4", counterparty="5554")
-    assert b"on its own row" in response.data
+    assert "på en egen rad".encode() in response.data
 
 
 def test_future_date_rejected(client, holding):
     response = add(client, event_type="birth", ppn="12345", count="1",
                    birth_year="2026", event_date="2026-10-01")
-    assert b"can&#39;t be in the future" in response.data
+    assert "kan inte ligga i framtiden".encode() in response.data
 
 
 def test_warning_must_be_acknowledged(app, client, holding):
@@ -76,7 +76,7 @@ def test_warning_must_be_acknowledged(app, client, holding):
             "ppn": "12345", "count": "2", "counterparty": "700001"}
     response = client.post("/journal/new", data=data)
     assert response.status_code == 200
-    assert b"driver&#39;s name" in response.data
+    assert "chaufförens namn".encode() in response.data
     assert balance(app)["present"] == 5
 
     response = add(client, **{k: v for k, v in data.items() if k not in ("event_date", "species")})
@@ -89,7 +89,7 @@ def test_negative_balance_warns(client, holding):
             "ppn": "12345", "count": "2", "counterparty": "700001",
             "driver_name": "L. Lasso", "vehicle_reg": "qwx123"}
     response = client.post("/journal/new", data=data)
-    assert b"makes the balance negative" in response.data
+    assert "gör saldot negativt".encode() in response.data
 
 
 def test_late_entry_is_flagged(app, client, holding):
@@ -98,7 +98,7 @@ def test_late_entry_is_flagged(app, client, holding):
     with app.app_context():
         from sheep_journal.rules import entry_flags
         assert entry_flags(store.list_entries()[0]) == ["late"]
-    assert b"more than 48 hours" in client.get("/").data
+    assert "mer än 48 timmar".encode() in client.get("/").data
 
 
 def test_void_removes_entry_from_balance(app, client, holding):
@@ -163,12 +163,12 @@ def test_december_count_validation(client, holding):
     response = client.post("/counts", data={
         "year": "2025", "species": "sheep", "count_date": "2025-11-30", "total": "8",
     })
-    assert b"between 1 and 31 December 2025" in response.data
+    assert "mellan 1 och 31 december 2025".encode() in response.data
     response = client.post("/counts", data={
         "year": "2025", "species": "sheep", "count_date": "2025-12-15", "total": "8",
         "ewes": "5", "rams": "0", "lambs": "2",
     })
-    assert b"doesn&#39;t match the total" in response.data
+    assert "inte stämmer med totalen".encode() in response.data
     response = client.post("/counts", data={
         "year": "2025", "species": "sheep", "count_date": "2025-12-15", "total": "7",
         "ewes": "5", "rams": "0", "lambs": "2", "reported_on": "2026-01-10",
@@ -179,7 +179,7 @@ def test_december_count_validation(client, holding):
 def test_missing_december_count_warns(client, holding):
     add(client, event_type="birth", ppn="12345", count="3", birth_year="2025",
         event_date="2025-06-01")
-    assert b"No December count recorded" in client.get("/").data
+    assert "Ingen decemberräkning registrerad".encode() in client.get("/").data
 
 
 def test_csv_export(client, holding):

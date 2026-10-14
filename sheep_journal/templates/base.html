@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="sv">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -11,16 +11,16 @@
     <a class="brand" href="{{ url_for('main.dashboard') }}">Stalljournal <span>får &amp; get</span></a>
     <nav>
       {% set ep = request.endpoint or '' %}
-      <a href="{{ url_for('main.dashboard') }}" {% if ep == 'main.dashboard' %}aria-current="page"{% endif %}>Overview</a>
+      <a href="{{ url_for('main.dashboard') }}" {% if ep == 'main.dashboard' %}aria-current="page"{% endif %}>Översikt</a>
       <a href="{{ url_for('journal.index') }}" {% if ep in ('journal.index', 'journal.edit', 'journal.print_sheet') %}aria-current="page"{% endif %}>Journal</a>
       <a href="{{ url_for('journal.new', direction='in') }}" {% if ep == 'journal.new' and direction == 'in' %}aria-current="page"{% endif %}>+ In</a>
-      <a href="{{ url_for('journal.new', direction='out') }}" {% if ep == 'journal.new' and direction == 'out' %}aria-current="page"{% endif %}>− Out</a>
-      <a href="{{ url_for('animals.index') }}" {% if ep.startswith('animals.') %}aria-current="page"{% endif %}>Animals</a>
-      <a href="{{ url_for('registers.tags') }}" {% if ep.startswith('registers.tag') %}aria-current="page"{% endif %}>Ear tags</a>
-      <a href="{{ url_for('registers.herd_log') }}" {% if ep.startswith('registers.herd_log') %}aria-current="page"{% endif %}>Herd log</a>
-      <a href="{{ url_for('main.counts') }}" {% if ep == 'main.counts' %}aria-current="page"{% endif %}>December count</a>
-      <a href="{{ url_for('registers.contacts') }}" {% if ep.startswith('registers.contact') %}aria-current="page"{% endif %}>Contacts</a>
-      <a href="{{ url_for('main.holding') }}" {% if ep == 'main.holding' %}aria-current="page"{% endif %}>Holding</a>
+      <a href="{{ url_for('journal.new', direction='out') }}" {% if ep == 'journal.new' and direction == 'out' %}aria-current="page"{% endif %}>− Ut</a>
+      <a href="{{ url_for('animals.index') }}" {% if ep.startswith('animals.') %}aria-current="page"{% endif %}>Djur</a>
+      <a href="{{ url_for('registers.tags') }}" {% if ep.startswith('registers.tag') %}aria-current="page"{% endif %}>Öronmärken</a>
+      <a href="{{ url_for('registers.herd_log') }}" {% if ep.startswith('registers.herd_log') %}aria-current="page"{% endif %}>Skötsel</a>
+      <a href="{{ url_for('main.counts') }}" {% if ep == 'main.counts' %}aria-current="page"{% endif %}>Decemberräkning</a>
+      <a href="{{ url_for('registers.contacts') }}" {% if ep.startswith('registers.contact') %}aria-current="page"{% endif %}>Kontakter</a>
+      <a href="{{ url_for('main.holding') }}" {% if ep == 'main.holding' %}aria-current="page"{% endif %}>Anläggning</a>
     </nav>
     {% if holding %}<span class="ppn">PPN {{ holding.ppn }}</span>{% endif %}
   </header>
@@ -35,9 +35,9 @@
   </main>
 
   <footer class="no-print">
-    Record events within 48 hours · keep the journal for at least 5 years ·
-    report movements to Jordbruksverket within 7 days ·
-    <a href="{{ url_for('main.export_csv') }}">Export CSV</a>
+    För in händelser inom 48 timmar · spara journalen i minst 5 år ·
+    rapportera förflyttningar till Jordbruksverket inom 7 dagar ·
+    <a href="{{ url_for('main.export_csv') }}">Exportera CSV</a>
   </footer>
   {% block scripts %}{% endblock %}
 </body>

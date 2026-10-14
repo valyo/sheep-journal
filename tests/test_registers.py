@@ -39,7 +39,7 @@ def test_tagging_is_balance_neutral(app, client, holding):
 def test_tagging_more_than_born_warns(client, holding):
     add(client, event_type="birth", ppn="12345", count="1", birth_year="2026")
     response = tag(client, [{"number": "00001"}, {"number": "00002"}])
-    assert b"more is too many" in response.data
+    assert "till är för många".encode() in response.data
 
 
 def test_tag_stock_and_double_tag_rule(app, client, holding):
@@ -50,10 +50,10 @@ def test_tag_stock_and_double_tag_rule(app, client, holding):
     add(client, event_type="birth", ppn="12345", count="2", birth_year="2026")
 
     response = tag(client, [{"number": "00099"}])
-    assert b"not in your ear tag stock" in response.data
+    assert "finns inte i ditt märkeslager".encode() in response.data
 
     response = tag(client, [{"number": "00013", "breeding": "1"}])
-    assert b"single ear tag" in response.data
+    assert "bara ett öronmärke".encode() in response.data
 
     tag(client, [{"number": "00013"}], ack=[])  # no warnings for a slaughter lamb
     with app.app_context():
@@ -64,7 +64,7 @@ def test_tag_stock_and_double_tag_rule(app, client, holding):
 def test_birth_split_cannot_exceed_count(client, holding):
     response = add(client, event_type="birth", ppn="12345", count="2", birth_year="2026",
                    males="2", females="1")
-    assert b"more than the number born" in response.data
+    assert "fler än antalet födda".encode() in response.data
 
 
 def test_birth_with_mother(app, client, holding):
@@ -82,7 +82,7 @@ def test_placeholder_vehicle_is_flagged(app, client, holding):
     response = client.post("/journal/new", data={
         "event_type": "slaughter", "event_date": "2026-09-29", "species": "sheep", "ppn": "12345",
         "count": "1", "counterparty": "099", "driver_name": "V. G.", "vehicle_reg": "XXX 000"})
-    assert b"look like a registration number" in response.data
+    assert "ser inte ut som ett registreringsnummer".encode() in response.data
 
 
 def test_contacts_show_in_journal(client, holding):
@@ -90,7 +90,7 @@ def test_contacts_show_in_journal(client, holding):
     add(client, event_type="purchase", ppn="234567", count="2", counterparty="234567")
     assert b"234567 (Grannby)" in client.get("/journal/").data
     response = client.post("/contacts/new", data={"ppn": "234567", "name": "Dup", "kind": "farm"})
-    assert b"already registered" in response.data
+    assert "redan registrerat".encode() in response.data
 
 
 def test_animal_details_and_number_lock(app, client, holding):
@@ -102,8 +102,8 @@ def test_animal_details_and_number_lock(app, client, holding):
     assert stina["status"] == "unrecorded" and stina["birth_year"] == 2019
     response = client.post(f"/animals/{stina['id']}/edit", data={
         "species": "sheep", "ppn": "34567", "individual_number": "99999", "name": "Stina"})
-    assert b"can&#39;t be changed here" in response.data
-    assert b"have no journal rows" in client.get("/").data
+    assert "kan inte ändras här".encode() in response.data
+    assert "saknar rader i journalen".encode() in client.get("/").data
 
 
 def test_herd_log(app, client, holding):
@@ -112,7 +112,7 @@ def test_herd_log(app, client, holding):
     response = client.post("/log/new", data={
         "event_date": "2026-09-29", "kind": "treatment", "species": "sheep",
         "animal": ["5554|00012"]})
-    assert b"Record which medicine" in response.data
+    assert "Ange vilket läkemedel".encode() in response.data
     client.post("/log/new", data={
         "event_date": "2026-09-29", "kind": "treatment", "species": "sheep",
         "animal": ["5554|00012"], "product": "Test-vet", "withdrawal_until": "2026-10-20"})

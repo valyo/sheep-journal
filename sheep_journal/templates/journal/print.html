@@ -3,21 +3,21 @@
 {% block content %}
 <div class="no-print print-controls">
   <form method="get">
-    <select name="sheet" aria-label="Sheet">
+    <select name="sheet" aria-label="Blad">
       <option value="plus" {% if sheet == 'plus' %}selected{% endif %}>Plusblad</option>
       <option value="minus" {% if sheet == 'minus' %}selected{% endif %}>Minusblad</option>
       <option value="temp" {% if sheet == 'temp' %}selected{% endif %}>Tillfälligt ute</option>
     </select>
-    <select name="year" aria-label="Year">
-      <option value="">All years</option>
+    <select name="year" aria-label="År">
+      <option value="">Alla år</option>
       {% for y in years %}<option {% if year == y %}selected{% endif %}>{{ y }}</option>{% endfor %}
     </select>
-    <select name="species" aria-label="Species">
-      <option value="">All species</option>
+    <select name="species" aria-label="Djurslag">
+      <option value="">Alla djurslag</option>
       {% for key, label in SPECIES.items() %}<option value="{{ key }}" {% if species == key %}selected{% endif %}>{{ label }}</option>{% endfor %}
     </select>
-    <button type="submit">Show</button>
-    <button type="button" onclick="window.print()">Print</button>
+    <button type="submit">Visa</button>
+    <button type="button" onclick="window.print()">Skriv ut</button>
   </form>
 </div>
 

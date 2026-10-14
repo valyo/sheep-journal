@@ -52,10 +52,10 @@
 {% macro warning_box(warnings) %}
 {% if warnings %}
 <div class="notice notice-warning" role="alert">
-  <strong>Please check before saving:</strong>
+  <strong>Kontrollera innan du sparar:</strong>
   <ul>{% for w in warnings %}<li>{{ w }}</li>{% endfor %}</ul>
   {% for w in warnings %}<input type="hidden" name="ack" value="{{ w }}">{% endfor %}
-  <p>Correct the entry, or save it anyway if it is right.</p>
+  <p>Rätta raden, eller spara ändå om den stämmer.</p>
 </div>
 {% endif %}
 {% endmacro %}

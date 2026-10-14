@@ -127,7 +127,7 @@ class Importer:
 
     def holding(self):
         if "Flik-B" not in self.wb.sheetnames:
-            raise ImportRefused("The workbook has no 'Flik-B' sheet with the holding details.")
+            raise ImportRefused("Arbetsboken saknar bladet 'Flik-B' med uppgifter om anläggningen.")
         pairs = {}
         for row in self.wb["Flik-B"].iter_rows(values_only=True):
             for i in range(0, len(row) - 1, 3):
@@ -137,7 +137,7 @@ class Importer:
 
         ppn = normalize_ppn(_text(pairs.get("Anläggningsnummer")))
         if not ppn:
-            raise ImportRefused("Flik-B has no 'Anläggningsnummer'.")
+            raise ImportRefused("Flik-B saknar 'Anläggningsnummer'.")
         self.own_ppn = ppn
         art = (_text(pairs.get("Art")) or "").lower()
         self.species = "goat" if art.startswith("get") else "sheep"
@@ -254,7 +254,7 @@ class Importer:
 
     def journal(self):
         if "data" not in self.wb.sheetnames:
-            raise ImportRefused("The workbook has no 'data' sheet with the journal rows.")
+            raise ImportRefused("Arbetsboken saknar bladet 'data' med journalraderna.")
         arrivals_seen = set()
         borrowed = set()           # animals / groups that arrived as someone else's
         pending_purchases = []     # group purchase rows of 1 waiting for their identity
@@ -290,7 +290,7 @@ class Importer:
             if not ppn and not recipient:
                 when = id_date or event_date
                 if not when:
-                    self.unresolved.append(f"Row {number} ('{note}') has no date and was skipped.")
+                    self.unresolved.append(f"Rad {number} ('{note}') saknar datum och hoppades över.")
                     continue
                 self.herd_events.append({
                     "event_date": when,
@@ -312,19 +312,19 @@ class Importer:
                     group_ppn = ppn or normalize_ppn(individual) or self.own_ppn
                     animal = {"ppn": group_ppn, "individual_number": None, "count": count or 1}
                 if not event_date:
-                    self.unresolved.append(f"Row {number} ('{note}') has no date and was skipped.")
+                    self.unresolved.append(f"Rad {number} ('{note}') saknar datum och hoppades över.")
                     continue
                 if recipient == self.own_ppn:
                     kind = "return_home"
                     counterparty = normalize_ppn(supplier_text)
                     self.changed.append(
-                        f"Row {number}: animals coming back to the holding were on the minus sheet; "
-                        "imported as 'Back from temporary stay' (plus)."
+                        f"Rad {number}: djur som kom tillbaka till anläggningen stod på minusbladet; "
+                        "importerad som 'Åter från tillfälligt ute' (plus)."
                     )
                 elif "slakt" in low:
                     kind, counterparty = "slaughter", recipient
                     name = re.search(r"\(([^)]+)\)", note)
-                    self._add_contact(recipient, name.group(1) if name else f"Slaughterhouse {recipient}",
+                    self._add_contact(recipient, name.group(1) if name else f"Slakteri {recipient}",
                                       kind="slaughterhouse")
                 elif "tillfällig" in low:
                     counterparty = recipient
@@ -332,8 +332,8 @@ class Importer:
                     if key in borrowed and animal["ppn"] == recipient:
                         kind = "loan_return"
                         self.changed.append(
-                            f"Row {number}: an animal from {recipient} going back there was imported "
-                            "as 'Returned to its owner'."
+                            f"Rad {number}: ett djur från {recipient} som gick tillbaka dit importerades "
+                            "som 'Återlämnad till ägaren'."
                         )
                     else:
                         kind = "temp_out"
@@ -356,7 +356,7 @@ class Importer:
                 match = next((p for p in pending_purchases if p[1]["ppn"] == tag[0]), None)
                 if match is None:
                     self.unresolved.append(
-                        f"Row {number}: identity {individual} without a date and no matching purchase row."
+                        f"Rad {number}: identiteten {individual} saknar datum och har ingen matchande inköpsrad."
                     )
                     continue
                 pending_purchases.remove(match)
@@ -364,8 +364,8 @@ class Importer:
                 entry.update({"individual_number": tag[2], "count": 1, "breeding": 1,
                               "birth_year": birth_year or tag[1]})
                 self.changed.append(
-                    f"Row {number}: identity and birth year of {individual} merged into the purchase "
-                    f"on {entry['event_date']} (row {match[0]})."
+                    f"Rad {number}: identitet och födelseår för {individual} slogs ihop med inköpet "
+                    f"{entry['event_date']} (rad {match[0]})."
                 )
                 continue
 
@@ -382,7 +382,7 @@ class Importer:
                 continue
 
             if not event_date:
-                self.unresolved.append(f"Row {number} ('{note}') has no date and was skipped.")
+                self.unresolved.append(f"Rad {number} ('{note}') saknar datum och hoppades över.")
                 continue
 
             if BIRTH_WORD.search(low) or (birth_year and normalize_ppn(supplier_text) == ppn == self.own_ppn):
@@ -390,8 +390,8 @@ class Importer:
                 females = re.search(r"(\d+)\s*tack", low)
                 if tag:
                     self.changed.append(
-                        f"Row {number}: {individual} in the individual column is the mother; "
-                        "imported as the mother of the litter."
+                        f"Rad {number}: {individual} i kolumnen individ-nr är modern; "
+                        "importerad som kullens mor."
                     )
                 self._add_entry(number, "birth", event_date,
                                 {"ppn": ppn, "individual_number": None, "count": count or 1}, common,
@@ -415,13 +415,13 @@ class Importer:
 
         for number, entry in pending_purchases:
             self.unresolved.append(
-                f"Row {number}: purchased animal from {entry['ppn']} on {entry['event_date']} "
-                "has no individual number."
+                f"Rad {number}: inköpt djur från {entry['ppn']} {entry['event_date']} "
+                "saknar individnummer."
             )
         for id_date, numbers in unnumbered_tagging.items():
             self.unresolved.append(
-                f"Rows {numbers[0]}–{numbers[-1]}: {len(numbers)} lambs ear-tagged on {id_date} without "
-                "individual numbers. Not imported: record them with Ear-tag lambs."
+                f"Rad {numbers[0]}–{numbers[-1]}: {len(numbers)} lamm öronmärkta {id_date} utan "
+                "individnummer. Inte importerade: för in dem med Öronmärk lamm."
             )
 
     def _add_entry(self, number, kind, event_date, animal, common, **fields):
@@ -461,13 +461,13 @@ class Importer:
             after = store.balance(as_of=day).get(self.species, {"present": 0})["present"]
             ok = stated in (before, after)
             numbers = ", ".join(str(n) for n, _, _ in by_date[day])
-            rows.append(f"| {day} | {numbers} | {stated} | {before} | {after} | {'✓' if ok else '**check**'} |")
+            rows.append(f"| {day} | {numbers} | {stated} | {before} | {after} | {'✓' if ok else '**kontrollera**'} |")
         table = []
         if rows:
             table = [
-                "Running totals in the spreadsheet compared with the journal (start and end of that day):",
+                "Löpande antal i kalkylarket jämfört med journalen (i början och slutet av dagen):",
                 "",
-                "| Date | Rows | Spreadsheet | Journal start of day | Journal end of day | |",
+                "| Datum | Rader | Kalkylarket | Journalen, dagens början | Journalen, dagens slut | |",
                 "|---|---|---|---|---|---|",
                 *rows,
             ]
@@ -484,16 +484,16 @@ class Importer:
                 contact = store.contact_by_ppn(ppn)
                 label = f"{ppn} ({contact['name']})" if contact else ppn
                 notes.append(
-                    f"{left} animal(s) with PPN {label} arrived as a group and have no departure. "
-                    "If they left, record when and how."
+                    f"{left} djur med PPN {label} kom som grupp och saknar utgång. "
+                    "Om de har lämnat, för in när och hur."
                 )
 
         animals = store.individual_animals()
         unrecorded = sorted(a["ref"] for a in animals.values() if a["status"] == "unrecorded")
         if unrecorded:
             notes.append(
-                f"{len(unrecorded)} animal(s) in the register have no journal rows: "
-                f"{', '.join(unrecorded)}. Record their ear-tagging (or purchase) in the journal."
+                f"{len(unrecorded)} djur i djurregistret saknar rader i journalen: "
+                f"{', '.join(unrecorded)}. För in deras öronmärkning (eller inköp) i journalen."
             )
         placeholders = sorted({
             e["vehicle_reg"] for _, e in self.entries
@@ -501,23 +501,23 @@ class Importer:
         })
         if placeholders:
             notes.append(
-                f"Vehicle registration(s) {', '.join(placeholders)} look like placeholders. "
-                "Replace them with the real numbers where you know them."
+                f"Registreringsnummer {', '.join(placeholders)} ser ut som platshållare. "
+                "Byt ut dem mot de riktiga numren där du känner till dem."
             )
         missing = sum(
             1 for e in store.list_entries(include_voided=False)
             if "no_transport" in entry_flags(e) and e["vehicle_reg"] not in placeholders
         )
         if missing:
-            notes.append(f"{missing} departure(s) have no driver or vehicle registration.")
+            notes.append(f"{missing} utgående rad(er) saknar chaufför eller registreringsnummer.")
 
         dates = sorted(e["event_date"] for _, e in self.entries)
         if dates:
             last = date.fromisoformat(dates[-1])
             if (today - last).days > 180:
                 notes.append(
-                    f"The journal has no entries after {last.isoformat()}. Record what has happened since "
-                    "(departures of the lambs, later births, deaths)."
+                    f"Journalen har inga rader efter {last.isoformat()}. För in vad som hänt sedan dess "
+                    "(lammens utgång, senare födslar, dödsfall)."
                 )
             missing = [
                 y for y in range(int(dates[0][:4]), today.year)
@@ -525,8 +525,8 @@ class Importer:
             ]
             if missing:
                 notes.append(
-                    f"No December count recorded for {', '.join(map(str, missing))}. If you reported "
-                    "counts to Jordbruksverket, add them under December count."
+                    f"Ingen decemberräkning registrerad för {', '.join(map(str, missing))}. Om du har "
+                    "rapporterat räkningar till Jordbruksverket, lägg till dem under Decemberräkning."
                 )
         return table, notes
 
@@ -538,8 +538,8 @@ def import_workbook(path, dry_run=False, replace=False):
     db = get_db()
     if store.entry_count() and not replace:
         raise ImportRefused(
-            "The journal already has entries. Use --replace to delete the current journal, animals, "
-            "ear tags, contacts, herd log and December counts and import from scratch."
+            "Journalen har redan rader. Använd --replace för att ta bort nuvarande journal, djur, "
+            "öronmärken, kontakter, skötselanteckningar och decemberräkningar och importera från början."
         )
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
@@ -574,49 +574,49 @@ def import_workbook(path, dry_run=False, replace=False):
     )
     with open(report_path, "w", encoding="utf-8") as f:
         f.write(report)
-    return report + f"\nReport saved to {report_path}\n"
+    return report + f"\nRapporten sparades i {report_path}\n"
 
 
 def _report(importer, holding, table, notes, stock, dry_run, replace):
     c = importer.counts
     entry_counts = {k.split(":", 1)[1]: v for k, v in c.items() if k.startswith("entry:")}
     lines = [
-        f"# Import of {importer.filename}",
+        f"# Import av {importer.filename}",
         "",
-        "**Dry run: nothing was saved.**" if dry_run else "Saved to the database.",
+        "**Provkörning: inget sparades.**" if dry_run else "Sparat i databasen.",
         "",
     ]
     if replace:
-        lines += ["The previous journal, animals, ear tags, contacts, herd log and December counts were deleted first.", ""]
+        lines += ["Tidigare journal, djur, öronmärken, kontakter, skötselanteckningar och decemberräkningar togs bort först.", ""]
     lines += [
-        "## Imported",
+        "## Importerat",
         "",
-        f"- Holding: PPN {holding['ppn']}, {holding['keeper_name']}"
+        f"- Anläggning: PPN {holding['ppn']}, {holding['keeper_name']}"
         f"{', ' + holding['category'] if holding['category'] else ''}",
-        f"- Contacts: {c['contacts']}",
-        f"- Animals in the register: {c['animals']}",
-        f"- Ear tags in stock: {c['tags']}",
-        f"- Journal rows: {sum(entry_counts.values())}"
+        f"- Kontakter: {c['contacts']}",
+        f"- Djur i djurregistret: {c['animals']}",
+        f"- Öronmärken i lager: {c['tags']}",
+        f"- Journalrader: {sum(entry_counts.values())}"
         + (" (" + ", ".join(f"{EVENT_TYPES[k].label.lower()} {v}" for k, v in sorted(entry_counts.items())) + ")"
            if entry_counts else ""),
-        f"- Herd log entries: {len(importer.herd_events)}",
-        f"- Running-total rows used only as checks: {len(importer.checkpoints)}",
+        f"- Skötselanteckningar: {len(importer.herd_events)}",
+        f"- Rader med löpande antal, använda endast som kontroll: {len(importer.checkpoints)}",
         "",
     ]
     if importer.changed:
-        lines += ["## Interpreted on the way", "", *[f"- {n}" for n in importer.changed], ""]
+        lines += ["## Tolkat under importen", "", *[f"- {n}" for n in importer.changed], ""]
     attention = importer.unresolved + notes
     if attention or table:
-        lines += ["## Needs your attention", ""]
+        lines += ["## Behöver åtgärdas", ""]
         lines += [f"- {n}" for n in attention]
         if table:
             lines += ["", *table]
         lines.append("")
     lines += [
-        "## Balance after import",
+        "## Saldo efter importen",
         "",
-        f"- On the holding according to the journal: {stock['present']}",
-        f"- Temporarily away: {stock['away']}",
+        f"- På anläggningen enligt journalen: {stock['present']}",
+        f"- Tillfälligt ute: {stock['away']}",
         "",
     ]
     return "\n".join(lines)

@@ -6,33 +6,33 @@
 <div class="heading-row">
   <h1>{{ tag_label(ppn, individual_number, a.tag_year) }}{% if a.name %} · {{ a.name }}{% endif %} <small>{{ species|species_label }}</small></h1>
   {% if a.id %}
-    <a class="button secondary" href="{{ url_for('animals.edit', animal_id=a.id) }}">Edit details</a>
+    <a class="button secondary" href="{{ url_for('animals.edit', animal_id=a.id) }}">Ändra uppgifter</a>
   {% else %}
-    <a class="button secondary" href="{{ url_for('animals.new', species=species, ppn=ppn, individual_number=individual_number) }}">Add details</a>
+    <a class="button secondary" href="{{ url_for('animals.new', species=species, ppn=ppn, individual_number=individual_number) }}">Lägg till uppgifter</a>
   {% endif %}
 </div>
 
 {% if animal %}
 <dl class="facts">
   <div><dt>Status</dt><dd><span class="status status-{{ a.status }}">{{ statuses[a.status] }}</span></dd></div>
-  <div><dt>Sex</dt><dd>{{ a.sex|sex_label or '—' }}</dd></div>
-  <div><dt>Born</dt><dd>{{ a.birth_date or a.birth_year or '—' }}</dd></div>
-  <div><dt>Breed</dt><dd>{{ a.breed or (holding.main_breed if holding else '') or '—' }}</dd></div>
-  {% if a.colour %}<div><dt>Colour</dt><dd>{{ a.colour }}</dd></div>{% endif %}
-  {% if a.markings %}<div><dt>Markings</dt><dd>{{ a.markings }}</dd></div>{% endif %}
-  {% if a.genotype %}<div><dt>Genotype</dt><dd>{{ a.genotype }}</dd></div>{% endif %}
-  <div><dt>Ear tag</dt><dd>{{ a.tag_type|tag_type_label or '—' }}{% if a.tag_model %}, {{ a.tag_model }}{% endif %}{% if a.tag_colour %}, {{ a.tag_colour }}{% endif %}{% if a.electronic_tag %}, electronic{% endif %}</dd></div>
+  <div><dt>Kön</dt><dd>{{ a.sex|sex_label or '—' }}</dd></div>
+  <div><dt>Född</dt><dd>{{ a.birth_date or a.birth_year or '—' }}</dd></div>
+  <div><dt>Ras</dt><dd>{{ a.breed or (holding.main_breed if holding else '') or '—' }}</dd></div>
+  {% if a.colour %}<div><dt>Färg</dt><dd>{{ a.colour }}</dd></div>{% endif %}
+  {% if a.markings %}<div><dt>Kännetecken</dt><dd>{{ a.markings }}</dd></div>{% endif %}
+  {% if a.genotype %}<div><dt>Genotyp</dt><dd>{{ a.genotype }}</dd></div>{% endif %}
+  <div><dt>Öronmärke</dt><dd>{{ a.tag_type|tag_type_label or '—' }}{% if a.tag_model %}, {{ a.tag_model }}{% endif %}{% if a.tag_colour %}, {{ a.tag_colour }}{% endif %}{% if a.electronic_tag %}, elektroniskt{% endif %}</dd></div>
   {% if a.elite_no %}<div><dt>Elitlamm</dt><dd>{{ a.elite_no }}{% if a.elite_code %} ({{ a.elite_code }}){% endif %}</dd></div>{% endif %}
 </dl>
 
-<h2>Parents</h2>
+<h2>Föräldrar</h2>
 <dl class="facts">
-  <div><dt>Mother</dt><dd>
+  <div><dt>Mor</dt><dd>
     {% set m = a.mother_id %}
     {% if m and m.count('-') == 1 %}<a href="{{ url_for('animals.detail', species=species, ppn=m.split('-')[0], individual_number=m.split('-')[1]) }}">{{ m }}</a>{% else %}{{ m or '—' }}{% endif %}
     {% if a.mother_name %}<br><span class="muted">{{ a.mother_name }}{% if a.mother_elite_no %} · {{ a.mother_elite_no }}{% endif %}</span>{% endif %}
   </dd></div>
-  <div><dt>Father</dt><dd>
+  <div><dt>Far</dt><dd>
     {{ a.father_id or '—' }}
     {% if a.father_name %}<br><span class="muted">{{ a.father_name }}{% if a.father_elite_no %} · {{ a.father_elite_no }}{% endif %}</span>{% endif %}
   </dd></div>
@@ -41,7 +41,7 @@
 {% endif %}
 
 {% if children %}
-<h2>Offspring</h2>
+<h2>Avkomma</h2>
 <ul class="inline-list">
   {% for c in children|sort(attribute='ref') %}
     <li><a href="{{ url_for('animals.detail', species=c.species, ppn=c.ppn, individual_number=c.individual_number) }}">{{ c.ref }}{% if c.name %} {{ c.name }}{% endif %}</a> <span class="muted">{{ c.birth_year or '' }}</span></li>
@@ -53,7 +53,7 @@
 {% if history %}
 <div class="table-wrap">
 <table>
-  <thead><tr><th></th><th>Date</th><th>Event</th><th>Supplier / recipient</th><th>Transporter</th><th>Other</th><th></th></tr></thead>
+  <thead><tr><th></th><th>Datum</th><th>Händelse</th><th>Leverantör / mottagare</th><th>Transportör</th><th>Övrigt</th><th></th></tr></thead>
   <tbody>
   {% for e in history %}
     <tr class="{% if e.voided_at %}voided{% endif %}">
@@ -62,30 +62,30 @@
       <td>{{ e.event_type|event_label }}</td>
       <td>{{ e.counterparty|party }}</td>
       <td>{{ e.driver_name or '' }} {{ e.vehicle_reg or '' }}</td>
-      <td>{{ remarks(e, holding) }}{% if e.voided_at %} <span class="badge">Voided: {{ e.void_reason }}</span>{% endif %}</td>
-      <td>{% if not e.voided_at %}<a href="{{ url_for('journal.edit', entry_id=e.id) }}">Edit</a>{% endif %}</td>
+      <td>{{ remarks(e, holding) }}{% if e.voided_at %} <span class="badge">Makulerad: {{ e.void_reason }}</span>{% endif %}</td>
+      <td>{% if not e.voided_at %}<a href="{{ url_for('journal.edit', entry_id=e.id) }}">Ändra</a>{% endif %}</td>
     </tr>
   {% endfor %}
   </tbody>
 </table>
 </div>
 {% else %}
-<p class="notice notice-warning">This animal has no journal rows. Record how it came to the holding, e.g. with <a href="{{ url_for('journal.tag_lambs') }}">Ear-tag lambs</a> or a purchase.</p>
+<p class="notice notice-warning">Djuret saknar rader i journalen. För in hur det kom till anläggningen, t.ex. med <a href="{{ url_for('journal.tag_lambs') }}">Öronmärk lamm</a> eller som inköp.</p>
 {% endif %}
 
-<h2>Herd log</h2>
+<h2>Skötsel</h2>
 {% if herd_events %}
 <ul class="inline-list">
   {% for h in herd_events %}
     <li><span class="nowrap">{{ h.event_date }}</span> {{ h.kind|herd_kind_label }}{% if h.product %}: {{ h.product }}{% if h.dose %} {{ h.dose }}{% endif %}{% endif %}{% if h.description %} – {{ h.description }}{% endif %}</li>
   {% endfor %}
 </ul>
-{% else %}<p class="muted">Nothing logged.</p>{% endif %}
+{% else %}<p class="muted">Inget antecknat.</p>{% endif %}
 
 <p class="buttons">
-  <a class="button secondary" href="{{ url_for('registers.herd_log_new', animal=ppn ~ '|' ~ individual_number) }}">Log shearing, treatment …</a>
+  <a class="button secondary" href="{{ url_for('registers.herd_log_new', animal=ppn ~ '|' ~ individual_number) }}">Anteckna klippning, behandling …</a>
   {% if animal and animal.status == 'present' %}
-    <a class="button secondary" href="{{ url_for('journal.new', direction='out') }}">Record departure or death</a>
+    <a class="button secondary" href="{{ url_for('journal.new', direction='out') }}">För in utgång eller dödsfall</a>
   {% endif %}
 </p>
 {% endblock %}
