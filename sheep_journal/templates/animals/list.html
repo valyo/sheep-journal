@@ -1,8 +1,11 @@
 {% extends "base.html" %}
 {% block title %}Animals{% endblock %}
 {% block content %}
-<h1>Individually recorded animals</h1>
-<p class="lede">Every animal that will live 12 months or longer, built from its journal rows. Group-recorded slaughter lambs don't appear here.</p>
+<div class="heading-row">
+  <h1>Animals</h1>
+  <a class="button secondary" href="{{ url_for('animals.new') }}">Add animal details</a>
+</div>
+<p class="lede">Every individually numbered animal. Where it is comes from the journal; name, parents and tags come from the animal register. Slaughter lambs recorded only as a group don't appear here.</p>
 
 <nav class="tabs">
   {% for key, label in statuses.items() %}
@@ -13,17 +16,18 @@
 {% if animals %}
 <div class="table-wrap">
 <table>
-  <thead><tr><th>ID</th><th>Species</th><th>Sex</th><th>Born</th><th>Breed</th><th>First recorded</th><th>Last event</th><th>Status</th></tr></thead>
+  <thead><tr><th>Ear tag</th><th>Name</th><th>Sex</th><th>Born</th><th>Breed</th><th>Tag</th><th>Mother</th><th>Last event</th><th>Status</th></tr></thead>
   <tbody>
   {% for a in animals %}
     <tr>
-      <td class="nowrap"><a href="{{ url_for('animals.detail', species=a.species, ppn=a.ppn, individual_number=a.individual_number) }}">{{ a.ppn }}-{{ a.individual_number }}</a>{% if a.electronic_tag %} <span class="badge" title="Electronic ear tag">E</span>{% endif %}</td>
-      <td>{{ a.species|species_label }}</td>
+      <td class="nowrap"><a href="{{ url_for('animals.detail', species=a.species, ppn=a.ppn, individual_number=a.individual_number) }}">{{ tag_label(a.ppn, a.individual_number, a.tag_year) }}</a>{% if a.electronic_tag %} <span class="badge" title="Electronic ear tag">E</span>{% endif %}</td>
+      <td>{{ a.name or '' }}</td>
       <td>{{ a.sex|sex_label }}</td>
-      <td>{{ a.birth_year or '' }}</td>
+      <td class="nowrap">{{ a.birth_date or a.birth_year or '' }}</td>
       <td>{{ a.breed or '' }}</td>
-      <td class="nowrap">{{ a.first_date }}</td>
-      <td>{{ a.last_event|event_label }} <span class="muted nowrap">{{ a.last_date }}</span></td>
+      <td>{{ a.tag_type|tag_type_label }}{% if a.tag_colour %} <span class="muted">{{ a.tag_colour }}</span>{% endif %}</td>
+      <td class="nowrap">{{ a.mother_id or '' }}</td>
+      <td>{% if a.last_event %}{{ a.last_event|event_label }} <span class="muted nowrap">{{ a.last_date }}</span>{% endif %}</td>
       <td><span class="status status-{{ a.status }}">{{ statuses[a.status] }}</span></td>
     </tr>
   {% endfor %}

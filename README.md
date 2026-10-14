@@ -18,6 +18,29 @@ docker compose run --rm web flask --app sheep_journal seed-demo   # demo herd (e
 docker compose run --rm web pytest                                # tests
 ```
 
+### Importing the old Google Sheets journal
+
+```bash
+docker compose run --rm web flask --app sheep_journal import-xlsx stalljournal.xlsx --dry-run
+docker compose run --rm web flask --app sheep_journal import-xlsx stalljournal.xlsx
+```
+
+The importer reads the `data`, `individuppgifter`, `ppn-regiser` and `Flik-B` sheets. It
+interprets rows rather than copying them: running totals ("ingående balans", "lamm kvar")
+become checks, returns recorded on the minus sheet become returns, a mother written in the
+individual column becomes the litter's mother, and purchase rows are merged with the rows
+that give the animals' identity. A report of everything it changed or couldn't resolve is
+printed and saved next to the database. `--replace` deletes the current data first.
+
+Spreadsheets are git-ignored: they contain personal data.
+
+### Schema changes
+
+`schema.sql` is the full current schema for new databases. Existing databases are upgraded
+on start by the numbered scripts in `sheep_journal/migrations/` (tracked with
+`PRAGMA user_version`). Add a new `NNNN_name.sql` there *and* update `schema.sql`; a test
+checks that both give the same tables.
+
 ## What it covers
 
 | Rule (Jordbruksverket) | In the app |
@@ -31,6 +54,20 @@ docker compose run --rm web pytest                                # tests
 | Keep records for 5 years | Entries are voided (crossed out, with a reason), never deleted |
 | Count all animals 1–31 December and report | December count page, compared with the journal balance |
 | Other breed / known genotype / re-tagging noted | Breed, genotype, previous ID, electronic tag fields |
+| Animals kept ≥ 12 months carry two ear tags | Tag type per animal and in the tag stock; warnings for breeding animals with a single tag |
+| Medicine use recorded and kept 5 years | Herd log with product, dose and withdrawal period; medicine records can't be deleted |
+
+Beyond the journal itself:
+
+- **Animal register**: name, exact birth date, sex, colour, breed, markings, mother and
+  father, elitlamm numbers, tag type and colour.
+- **Ear-tag lambs**: births can be recorded as a litter (with mother and males/females) and
+  the lambs ear-tagged later. Tagging rows appear on the plus sheet but don't change the
+  balance.
+- **Ear tag stock**: add a tag order as a number range; the next unused numbers are
+  suggested when tagging.
+- **Contacts**: other holdings and slaughterhouses by PPN, shown by name in the journal.
+- **Herd log**: shearing, treatments, vaccinations, deworming and other work.
 
 Print views reproduce the paper plusblad, minusblad and *tillfälligt ute* sheets, and
 `/export.csv` exports the full journal (semicolon-separated for Swedish Excel).
@@ -43,13 +80,16 @@ this app only keeps the journal.
 ```
 sheep_journal/
   __init__.py      app factory
-  schema.sql       tables: holding, entry, annual_count
+  schema.sql       tables: holding, contact, entry, animal, ear_tag, herd_event, annual_count
+  migrations/      upgrades for existing databases
   constants.py     event types and labels
+  ids.py           ear tag number parsing
+  importer.py      Google Sheets / xlsx import
   rules.py         form parsing and the record-keeping rules
   store.py         database queries
-  views/           dashboard, journal, animals
+  views/           dashboard, journal, animals, registers (contacts, tags, herd log)
   templates/, static/
 tests/
 ```
 
-Not included yet: user accounts, schema migrations, and a production server setup.
+Not included yet: user accounts and a production server setup.

@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% from "_macros.html" import field, select, textarea, field_error %}
+{% block title %}Log an event{% endblock %}
+{% block content %}
+<h1>Log an event</h1>
+<form method="post" class="form" id="log-form">
+  <div class="grid">
+    {{ field("event_date", "Date", values, errors, type="date", attrs='required max="' ~ today.isoformat() ~ '"') }}
+    {{ select("kind", "What was done", HERD_EVENT_KINDS, values, errors, blank="Choose…") }}
+    {{ select("species", "Species", SPECIES, values, errors) }}
+  </div>
+
+  <fieldset>
+    <legend>Which animals</legend>
+    {% if present %}
+      <div class="animal-picks">
+        {% for a in present %}
+          {% set key = a.ppn ~ '|' ~ a.individual_number %}
+          <label><input type="checkbox" name="animal" value="{{ key }}" {% if key in selected %}checked{% endif %}>
+            {{ a.ref }}{% if a.name %} {{ a.name }}{% endif %}</label>
+        {% endfor %}
+      </div>
+      <p><button type="button" class="link" id="pick-all">Select all</button></p>
+    {% endif %}
+    {{ field("subject", "Or a group", values, errors, help="e.g. all lambs, when the animals aren't individually numbered") }}
+  </fieldset>
+
+  <fieldset id="medicine">
+    <legend>Medicine</legend>
+    <div class="grid">
+      {{ field("product", "Product", values, errors, help="Required for treatments, vaccinations and deworming") }}
+      {{ field("dose", "Dose", values, errors) }}
+      {{ field("withdrawal_until", "Withdrawal period ends (karenstid)", values, errors, type="date") }}
+      {{ field("prescribed_by", "Prescribed by", values, errors) }}
+    </div>
+  </fieldset>
+
+  <div class="grid">
+    {{ textarea("description", "Description", values, errors) }}
+    {{ textarea("notes", "Notes", values, errors) }}
+  </div>
+  <div class="buttons">
+    <button type="submit">Save</button>
+    <a href="{{ url_for('registers.herd_log') }}">Cancel</a>
+  </div>
+</form>
+{% endblock %}
+{% block scripts %}
+<script>
+  (function () {
+    const all = document.getElementById("pick-all");
+    if (all) all.addEventListener("click", () =>
+      document.querySelectorAll('input[name="animal"]').forEach((c) => { c.checked = true; }));
+  })();
+</script>
+{% endblock %}

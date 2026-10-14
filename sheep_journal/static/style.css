@@ -163,6 +163,19 @@ td.other { min-width: 14rem; }
 .facts dt { color: var(--muted); font-size: .85rem; }
 .facts dd { margin: 0; font-weight: 600; }
 
+button.link {
+  background: none; border: none; padding: 0; color: var(--accent); text-decoration: underline; cursor: pointer;
+}
+.center { text-align: center; }
+.status-unrecorded { color: var(--out); font-weight: 600; }
+.inline-list { padding-left: 1.25rem; margin: .25rem 0 1rem; }
+.inline-list li { margin: .15rem 0; }
+.animal-picks { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: .35rem 1rem; margin-bottom: .5rem; }
+.animal-picks label { display: flex; gap: .4rem; align-items: center; }
+.wide-form { max-width: 1100px; }
+.tag-rows td { vertical-align: middle; }
+.tag-rows input:not([type=checkbox]), .tag-rows select { min-width: 7rem; }
+
 /* --- print sheets --- */
 .print-controls form { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: 1rem; }
 .print-controls select { width: auto; }

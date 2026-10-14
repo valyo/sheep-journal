@@ -23,9 +23,11 @@
   <div class="card actions">
     <h2>Record</h2>
     <a class="button" href="{{ url_for('journal.new', event_type='birth') }}">Lambs / kids born</a>
+    <a class="button" href="{{ url_for('journal.tag_lambs') }}">Ear-tag lambs</a>
     <a class="button" href="{{ url_for('journal.new', direction='in') }}">+ Arrival</a>
     <a class="button" href="{{ url_for('journal.new', direction='out') }}">− Departure or death</a>
-    <a class="button secondary" href="{{ url_for('journal.recruit') }}">Keep a lamb for breeding</a>
+    <a class="button secondary" href="{{ url_for('journal.recruit') }}">Keep a group lamb for breeding</a>
+    <a class="button secondary" href="{{ url_for('registers.herd_log_new') }}">Shearing, treatment …</a>
   </div>
 </section>
 

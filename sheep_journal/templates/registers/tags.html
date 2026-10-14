@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% from "_macros.html" import field, select %}
+{% block title %}Ear tags{% endblock %}
+{% block content %}
+<h1>Ear tag stock</h1>
+<p class="lede">Tags ordered for your holding. A tag counts as used once an animal or a journal row carries its number.
+  Animals kept beyond 12 months need two tags; slaughter lambs may have one.</p>
+
+<section class="cards">
+  <div class="card stat"><h2>Unused single tags</h2><p class="big">{{ summary.single }}</p></div>
+  <div class="card stat"><h2>Unused double tags</h2><p class="big">{{ summary.double }}</p></div>
+</section>
+
+<h2>Add a tag order</h2>
+<form method="post" class="form">
+  <div class="grid">
+    {{ field("first", "First number", values, errors, attrs='required inputmode="numeric"', help="e.g. 00013") }}
+    {{ field("last", "Last number", values, errors, attrs='inputmode="numeric"', help="Leave empty for a single tag") }}
+    {{ select("tag_type", "Type", TAG_TYPES, values, errors) }}
+    {{ field("tag_model", "Model", values, errors, help="e.g. micro") }}
+    {{ field("tag_colour", "Colour", values, errors) }}
+    {{ field("order_ref", "Order number", values, errors, help="From the supplier, e.g. 2023/10001") }}
+    {{ select("species", "Species", SPECIES, values, errors) }}
+  </div>
+  <button type="submit">Add to stock</button>
+</form>
+
+{% if rows %}
+<h2>All tags</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Number</th><th>Type</th><th>Model</th><th>Colour</th><th>Order</th><th>Status</th><th></th></tr></thead>
+  <tbody>
+  {% for t, a in rows %}
+    <tr class="{% if t.lost %}voided{% endif %}">
+      <td class="nowrap">{{ tag_label(holding.ppn, t.individual_number) if holding else t.individual_number }}</td>
+      <td>{{ t.tag_type|tag_type_label }}</td>
+      <td>{{ t.tag_model or '' }}</td>
+      <td>{{ t.tag_colour or '' }}</td>
+      <td>{{ t.order_ref or '' }}</td>
+      <td>
+        {% if t.used and a %}
+          Used: <a href="{{ url_for('animals.detail', species=a.species, ppn=a.ppn, individual_number=a.individual_number) }}">{{ a.name or a.ref }}</a>
+        {% elif t.used %}Used{% elif t.lost %}Lost{% else %}<span class="status-present">Unused</span>{% endif %}
+      </td>
+      <td>
+        {% if not t.used %}
+        <form method="post" action="{{ url_for('registers.tag_lost', tag_id=t.id) }}">
+          <input type="hidden" name="lost" value="{{ 0 if t.lost else 1 }}">
+          <button type="submit" class="link">{{ 'Found again' if t.lost else 'Mark lost' }}</button>
+        </form>
+        {% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endif %}
+{% endblock %}

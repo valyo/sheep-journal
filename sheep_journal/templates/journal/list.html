@@ -58,7 +58,7 @@
       <td class="nowrap">{{ animal_id(e) }}{% if e.breeding %} <span class="badge" title="Livdjur">L</span>{% endif %}</td>
       <td class="num">{{ e.count }}</td>
       <td>{{ e.birth_year or '' }}</td>
-      <td>{{ e.counterparty or '' }}</td>
+      <td>{{ e.counterparty|party }}</td>
       <td>{% if e.driver_name or e.vehicle_reg %}{{ e.driver_name or '' }} {{ e.vehicle_reg or '' }}{% endif %}</td>
       <td class="other">
         {{ remarks(e, holding) }}

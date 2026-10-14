@@ -16,7 +16,10 @@
       <a href="{{ url_for('journal.new', direction='in') }}" {% if ep == 'journal.new' and direction == 'in' %}aria-current="page"{% endif %}>+ In</a>
       <a href="{{ url_for('journal.new', direction='out') }}" {% if ep == 'journal.new' and direction == 'out' %}aria-current="page"{% endif %}>− Out</a>
       <a href="{{ url_for('animals.index') }}" {% if ep.startswith('animals.') %}aria-current="page"{% endif %}>Animals</a>
+      <a href="{{ url_for('registers.tags') }}" {% if ep.startswith('registers.tag') %}aria-current="page"{% endif %}>Ear tags</a>
+      <a href="{{ url_for('registers.herd_log') }}" {% if ep.startswith('registers.herd_log') %}aria-current="page"{% endif %}>Herd log</a>
       <a href="{{ url_for('main.counts') }}" {% if ep == 'main.counts' %}aria-current="page"{% endif %}>December count</a>
+      <a href="{{ url_for('registers.contacts') }}" {% if ep.startswith('registers.contact') %}aria-current="page"{% endif %}>Contacts</a>
       <a href="{{ url_for('main.holding') }}" {% if ep == 'main.holding' %}aria-current="page"{% endif %}>Holding</a>
     </nav>
     {% if holding %}<span class="ppn">PPN {{ holding.ppn }}</span>{% endif %}

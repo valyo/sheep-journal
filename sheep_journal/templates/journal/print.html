@@ -63,9 +63,9 @@
         <td class="nowrap">{{ e.event_date }}</td>
         {% if sheet == 'plus' %}
           <td>{{ e.birth_year or '' }}</td>
-          <td>{{ e.counterparty or '' }}</td>
+          <td>{{ e.counterparty|party }}</td>
         {% else %}
-          <td>{{ e.counterparty or '' }}</td>
+          <td>{{ e.counterparty|party }}</td>
           <td>{{ e.driver_name or '' }}</td>
           <td>{{ e.vehicle_reg or '' }}</td>
         {% endif %}

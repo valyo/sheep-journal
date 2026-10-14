@@ -25,10 +25,11 @@ def create_app(test_config=None):
     db.init_app(app)
     filters.init_app(app)
 
-    from .views import animals, journal, main
+    from .views import animals, journal, main, registers
 
     app.register_blueprint(main.bp)
     app.register_blueprint(journal.bp)
     app.register_blueprint(animals.bp)
+    app.register_blueprint(registers.bp)
 
     return app

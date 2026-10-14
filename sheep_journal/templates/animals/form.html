@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% from "_macros.html" import field, select, textarea, checkbox %}
+{% block title %}{% if animal_id %}Edit animal{% else %}Add animal{% endif %}{% endblock %}
+{% block content %}
+<h1>{% if animal_id %}Edit animal details{% else %}Add animal details{% endif %}</h1>
+<p class="lede">These details are for you and for breeding records. Where the animal is, and when it came or left, is recorded in the journal.</p>
+
+<form method="post" class="form">
+  <fieldset>
+    <legend>Ear tag</legend>
+    <div class="grid">
+      {{ select("species", "Species", SPECIES, values, errors) }}
+      {{ field("ppn", "PPN on the tag", values, errors, attrs="required") }}
+      {{ field("individual_number", "Individual number", values, errors, attrs="required") }}
+      {{ field("tag_year", "Year on the tag", values, errors, type="number", attrs='min="1990"') }}
+      {{ select("tag_type", "Tags", TAG_TYPES, values, errors, blank="—") }}
+      {{ field("tag_model", "Tag model", values, errors, help="e.g. micro") }}
+      {{ field("tag_colour", "Tag colour", values, errors) }}
+      {{ checkbox("electronic_tag", "Electronic ear tag", values) }}
+    </div>
+  </fieldset>
+  <fieldset>
+    <legend>The animal</legend>
+    <div class="grid">
+      {{ field("name", "Name", values, errors) }}
+      {{ select("sex", "Sex", SEXES, values, errors, blank="—") }}
+      {{ field("birth_date", "Birth date", values, errors, help="YYYY-MM-DD, or YYYY-MM if the day is unknown") }}
+      {{ field("birth_year", "Birth year", values, errors, type="number") }}
+      {{ field("breed", "Breed", values, errors) }}
+      {{ field("colour", "Colour", values, errors) }}
+      {{ field("markings", "Markings (kännetecken)", values, errors) }}
+      {{ field("elite_no", "Elitlamm reg. no.", values, errors) }}
+      {{ field("elite_code", "Elitlamm code", values, errors) }}
+    </div>
+  </fieldset>
+  <fieldset>
+    <legend>Parents</legend>
+    <div class="grid">
+      {{ field("mother_id", "Mother's ear tag", values, errors, attrs='list="mothers" autocomplete="off"') }}
+      {{ field("mother_name", "Mother's name", values, errors) }}
+      {{ field("mother_elite_no", "Mother's elitlamm no.", values, errors) }}
+      {{ field("father_id", "Father's ear tag", values, errors, help="Or a description if unknown") }}
+      {{ field("father_name", "Father's name", values, errors) }}
+      {{ field("father_elite_no", "Father's elitlamm no.", values, errors) }}
+    </div>
+  </fieldset>
+  {{ textarea("notes", "Notes", values, errors) }}
+  <datalist id="mothers">
+    {% for m in mothers %}<option value="{{ m.ref }}">{{ m.name or '' }}</option>{% endfor %}
+  </datalist>
+  <div class="buttons">
+    <button type="submit">Save</button>
+    <a href="{{ url_for('animals.index') }}">Cancel</a>
+  </div>
+</form>
+{% endblock %}

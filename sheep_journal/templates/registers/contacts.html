@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Contacts{% endblock %}
+{% block content %}
+<div class="heading-row">
+  <h1>Contacts (PPN register)</h1>
+  <a class="button" href="{{ url_for('registers.contact_form') }}">Add contact</a>
+</div>
+<p class="lede">Farms and slaughterhouses your animals come from or go to. Their names show next to the PPN in the journal, and the entry form suggests them.</p>
+
+{% if contacts %}
+<div class="table-wrap">
+<table>
+  <thead><tr><th>PPN</th><th>Name</th><th>Type</th><th>Keeper</th><th>Phone</th><th>Address</th><th></th></tr></thead>
+  <tbody>
+  {% for c in contacts %}
+    <tr>
+      <td class="nowrap">{{ c.ppn or '—' }}</td>
+      <td>{{ c.name }}</td>
+      <td>{{ CONTACT_KINDS[c.kind] }}</td>
+      <td>{{ c.keeper or '' }}</td>
+      <td class="nowrap">{{ c.phone or '' }}</td>
+      <td>{{ c.address or '' }}</td>
+      <td><a href="{{ url_for('registers.contact_form', contact_id=c.id) }}">Edit</a></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% else %}
+<p class="muted">No contacts yet.</p>
+{% endif %}
+{% endblock %}

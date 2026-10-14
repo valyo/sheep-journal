@@ -32,7 +32,7 @@
       {{ field_error('event_type', errors) }}
     </div>
     {{ field("event_date", "Date", values, errors, type="date", attrs='required max="' ~ today.isoformat() ~ '"',
-             help="The day the animals arrived or left. For births: the day the lambs were ear-tagged (identifieringsdatum).") }}
+             help="The day the animals arrived or left. For births: the birth date, or the day the lambs were ear-tagged.") }}
     {{ select("species", "Species", SPECIES, values, errors) }}
   </div>
 
@@ -47,6 +47,16 @@
                help="1 for an individually numbered animal.") }}
       {{ checkbox("breeding", "Livdjur: will live 12 months or longer", values,
                   help="These animals must be recorded individually. Slaughter lambs may be recorded as a group.") }}
+    </div>
+  </fieldset>
+
+  <fieldset data-show="birth">
+    <legend>Birth</legend>
+    <div class="grid">
+      {{ field("mother_id", "Mother", values, errors, attrs='list="mothers" autocomplete="off"',
+               help="The ewe's ear tag, e.g. 34567-19011.") }}
+      {{ field("males", "Of which male", values, errors, type="number", attrs='min="0"') }}
+      {{ field("females", "Of which female", values, errors, type="number", attrs='min="0"') }}
     </div>
   </fieldset>
 
@@ -67,7 +77,8 @@
     <legend id="counterparty-legend">{{ 'Supplier (leverantör)' if direction == 'in' else 'Recipient (mottagare)' }}</legend>
     <div class="grid">
       {{ field("counterparty", "PPN of the other holding, or name and address", values, errors,
-               help="For slaughter: the slaughterhouse's PPN.") }}
+               attrs='list="contacts" autocomplete="off"',
+               help="For slaughter: the slaughterhouse's PPN. Known holdings are in Contacts.") }}
     </div>
   </fieldset>
 
@@ -85,6 +96,13 @@
                 help="Required. Keep documentation about dead animals for 5 years.") }}
     {{ textarea("notes", "Notes (övrigt)", values, errors) }}
   </div>
+
+  <datalist id="contacts">
+    {% for c in contacts if c.ppn %}<option value="{{ c.ppn }}">{{ c.name }}{% if c.keeper %} – {{ c.keeper }}{% endif %}</option>{% endfor %}
+  </datalist>
+  <datalist id="mothers">
+    {% for a in mothers %}<option value="{{ a.ref }}">{{ a.name or '' }}{% if a.status != 'present' %} (not on holding){% endif %}</option>{% endfor %}
+  </datalist>
 
   <div class="buttons">
     <button type="submit">{{ 'Save anyway' if warnings else 'Save' }}</button>
