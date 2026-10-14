@@ -18,7 +18,12 @@ def create_app(test_config=None):
     if test_config:
         app.config.update(test_config)
 
-    os.makedirs(os.path.dirname(os.path.abspath(app.config["DATABASE"])), exist_ok=True)
+    data_dir = os.path.dirname(os.path.abspath(app.config["DATABASE"]))
+    # Animal photos are kept next to the database, so they are backed up together.
+    app.config.setdefault("UPLOAD_FOLDER", os.path.join(data_dir, "uploads"))
+    # Two phone photos per upload.
+    app.config.setdefault("MAX_CONTENT_LENGTH", 40 * 1024 * 1024)
+    os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
     from . import db, filters
 

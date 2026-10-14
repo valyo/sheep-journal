@@ -12,6 +12,30 @@
   {% endif %}
 </div>
 
+<section class="photos">
+  {% for p in photos %}
+    <figure class="photo">
+      <a href="{{ url_for('animals.photo', photo_id=p.id) }}" target="_blank" rel="noopener">
+        <img src="{{ url_for('animals.photo_thumb', photo_id=p.id) }}" alt="Bild {{ loop.index }} på {{ a.name or (ppn ~ '-' ~ individual_number) }}" loading="lazy">
+      </a>
+      <figcaption>
+        <form method="post" action="{{ url_for('animals.delete_photo', photo_id=p.id) }}" onsubmit="return confirm('Ta bort bilden?')">
+          <button type="submit" class="link">Ta bort</button>
+        </form>
+      </figcaption>
+    </figure>
+  {% endfor %}
+  {% if photos|length < max_photos %}
+    <form method="post" enctype="multipart/form-data" class="photo-upload"
+          action="{{ url_for('animals.upload_photos', species=species, ppn=ppn, individual_number=individual_number) }}">
+      <label for="photos">{{ 'Lägg till bilder' if not photos else 'Lägg till en bild till' }}</label>
+      <input id="photos" type="file" name="photos" accept="image/jpeg,image/png,image/webp" {% if max_photos - photos|length > 1 %}multiple{% endif %} required>
+      <small>Högst {{ max_photos }} bilder per djur (JPEG, PNG eller WebP).</small>
+      <button type="submit">Ladda upp</button>
+    </form>
+  {% endif %}
+</section>
+
 {% if animal %}
 <dl class="facts">
   <div><dt>Status</dt><dd><span class="status status-{{ a.status }}">{{ statuses[a.status] }}</span></dd></div>

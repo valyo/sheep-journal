@@ -394,6 +394,46 @@ def offspring(ref):
     return [a for a in individual_animals().values() if a["mother_id"] == ref]
 
 
+# --- animal photos -------------------------------------------------------------
+
+
+def list_photos(species, ppn, individual_number):
+    return get_db().execute(
+        "SELECT * FROM animal_photo WHERE species = ? AND ppn = ? AND individual_number = ? "
+        "ORDER BY id",
+        (species, ppn, individual_number),
+    ).fetchall()
+
+
+def first_photos():
+    """The first photo of every animal that has one, keyed like individual_animals()."""
+    rows = get_db().execute(
+        "SELECT * FROM animal_photo WHERE id IN "
+        "(SELECT MIN(id) FROM animal_photo GROUP BY species, ppn, individual_number)"
+    ).fetchall()
+    return {(r["species"], r["ppn"], r["individual_number"]): r for r in rows}
+
+
+def add_photo(species, ppn, individual_number, filename, original_name):
+    db = get_db()
+    db.execute(
+        "INSERT INTO animal_photo (species, ppn, individual_number, filename, original_name, uploaded_at) "
+        "VALUES (?, ?, ?, ?, ?, ?)",
+        (species, ppn, individual_number, filename, original_name, clock.now().isoformat()),
+    )
+    db.commit()
+
+
+def get_photo(photo_id):
+    return get_db().execute("SELECT * FROM animal_photo WHERE id = ?", (photo_id,)).fetchone()
+
+
+def delete_photo(photo_id):
+    db = get_db()
+    db.execute("DELETE FROM animal_photo WHERE id = ?", (photo_id,))
+    db.commit()
+
+
 # --- ear tag stock -------------------------------------------------------------
 
 

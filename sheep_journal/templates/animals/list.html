@@ -16,10 +16,12 @@
 {% if animals %}
 <div class="table-wrap">
 <table>
-  <thead><tr><th>Öronmärke</th><th>Namn</th><th>Kön</th><th>Född</th><th>Ras</th><th>Märke</th><th>Mor</th><th>Senaste händelse</th><th>Status</th></tr></thead>
+  <thead><tr><th><span class="visually-hidden">Bild</span></th><th>Öronmärke</th><th>Namn</th><th>Kön</th><th>Född</th><th>Ras</th><th>Märke</th><th>Mor</th><th>Senaste händelse</th><th>Status</th></tr></thead>
   <tbody>
   {% for a in animals %}
+    {% set p = photos.get((a.species, a.ppn, a.individual_number)) %}
     <tr>
+      <td class="thumb-cell">{% if p %}<a href="{{ url_for('animals.detail', species=a.species, ppn=a.ppn, individual_number=a.individual_number) }}"><img class="thumb" src="{{ url_for('animals.photo_thumb', photo_id=p.id) }}" alt="" loading="lazy"></a>{% endif %}</td>
       <td class="nowrap"><a href="{{ url_for('animals.detail', species=a.species, ppn=a.ppn, individual_number=a.individual_number) }}">{{ tag_label(a.ppn, a.individual_number, a.tag_year) }}</a>{% if a.electronic_tag %} <span class="badge" title="Elektroniskt öronmärke">E</span>{% endif %}</td>
       <td>{{ a.name or '' }}</td>
       <td>{{ a.sex|sex_label }}</td>

@@ -176,6 +176,27 @@ button.link {
 .tag-rows td { vertical-align: middle; }
 .tag-rows input:not([type=checkbox]), .tag-rows select { min-width: 7rem; }
 
+/* --- animal photos --- */
+.photos { display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-start; margin: 1rem 0; }
+.photo { margin: 0; }
+.photo img {
+  display: block; width: 220px; height: 220px; object-fit: cover;
+  border-radius: var(--radius); border: 1px solid var(--border);
+}
+.photo figcaption { margin-top: .25rem; font-size: .85rem; }
+.photo-upload {
+  display: flex; flex-direction: column; gap: .4rem; width: 220px; min-height: 220px; justify-content: center;
+  padding: 1rem; border: 2px dashed var(--border); border-radius: var(--radius); background: var(--surface);
+}
+.photo-upload label { font-weight: 600; }
+.photo-upload input[type=file] { font-size: .85rem; width: 100%; }
+.photo-upload small { color: var(--muted); }
+.thumb-cell { width: 3.5rem; padding-top: .3rem; padding-bottom: .3rem; }
+.thumb { width: 48px; height: 48px; object-fit: cover; border-radius: 6px; display: block; }
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+}
+
 /* --- print sheets --- */
 .print-controls form { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: 1rem; }
 .print-controls select { width: auto; }

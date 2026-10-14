@@ -105,6 +105,21 @@ CREATE TABLE IF NOT EXISTS animal (
     UNIQUE (species, ppn, individual_number)
 );
 
+-- Photos of an animal (at most 2), keyed by ear tag like the journal rows, so
+-- they also work for animals that only appear in the journal. The files live in
+-- the uploads folder next to the database.
+CREATE TABLE IF NOT EXISTS animal_photo (
+    id                INTEGER PRIMARY KEY AUTOINCREMENT,
+    species           TEXT NOT NULL CHECK (species IN ('sheep', 'goat')),
+    ppn               TEXT NOT NULL,
+    individual_number TEXT NOT NULL,
+    filename          TEXT NOT NULL UNIQUE,   -- <name>.jpg, thumbnail <name>_thumb.jpg
+    original_name     TEXT,
+    uploaded_at       TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS animal_photo_animal_idx ON animal_photo (species, ppn, individual_number);
+
 -- Ear tags ordered for the own holding. A tag is used once an animal or a
 -- journal row with the own PPN carries its number.
 CREATE TABLE IF NOT EXISTS ear_tag (

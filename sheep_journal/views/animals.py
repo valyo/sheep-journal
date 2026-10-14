@@ -1,6 +1,16 @@
-from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
+from flask import (
+    Blueprint,
+    abort,
+    flash,
+    redirect,
+    render_template,
+    request,
+    send_from_directory,
+    url_for,
+)
+from werkzeug.exceptions import RequestEntityTooLarge
 
-from .. import rules, store
+from .. import photos, rules, store
 from ..constants import holding_species
 
 bp = Blueprint("animals", __name__, url_prefix="/animals")
@@ -26,7 +36,8 @@ def index():
     ]
     animals.sort(key=lambda a: (a["species"], a["ppn"], a["individual_number"]))
     return render_template(
-        "animals/list.html", animals=animals, status=status, species=species, statuses=STATUSES
+        "animals/list.html", animals=animals, status=status, species=species, statuses=STATUSES,
+        photos=store.first_photos(),
     )
 
 
@@ -42,7 +53,78 @@ def detail(species, ppn, individual_number):
         species=species, ppn=ppn, individual_number=individual_number,
         herd_events=store.list_herd_events(species=species, ppn=ppn, individual_number=individual_number),
         children=store.offspring(f"{ppn}-{individual_number}"),
+        photos=store.list_photos(species, ppn, individual_number),
+        max_photos=photos.MAX_PHOTOS,
     )
+
+
+def _animal_exists(species, ppn, individual_number):
+    return (
+        (species, ppn, individual_number) in store.individual_animals()
+        or bool(store.animal_history(species, ppn, individual_number))
+    )
+
+
+@bp.route("/<species>/<ppn>/<individual_number>/photos", methods=["POST"])
+def upload_photos(species, ppn, individual_number):
+    if not _animal_exists(species, ppn, individual_number):
+        abort(404)
+    back = redirect(url_for(".detail", species=species, ppn=ppn, individual_number=individual_number))
+    files = [f for f in request.files.getlist("photos") if f and f.filename]
+    if not files:
+        flash("Välj en eller två bilder att ladda upp.", "error")
+        return back
+    existing = len(store.list_photos(species, ppn, individual_number))
+    room = photos.MAX_PHOTOS - existing
+    if len(files) > room:
+        flash(
+            f"Ett djur kan ha högst {photos.MAX_PHOTOS} bilder. "
+            + (f"Det finns plats för {room} till." if room else "Ta bort en bild först."),
+            "error",
+        )
+        return back
+    saved = 0
+    for file in files:
+        try:
+            filename = photos.save(file)
+        except photos.PhotoError as exc:
+            flash(str(exc), "error")
+            continue
+        store.add_photo(species, ppn, individual_number, filename, file.filename)
+        saved += 1
+    if saved:
+        flash(f"{saved} bild(er) uppladdade.", "success")
+    return back
+
+
+@bp.route("/photos/<int:photo_id>")
+def photo(photo_id):
+    row = store.get_photo(photo_id) or abort(404)
+    return send_from_directory(photos.folder(), row["filename"], max_age=31536000)
+
+
+@bp.route("/photos/<int:photo_id>/thumb")
+def photo_thumb(photo_id):
+    row = store.get_photo(photo_id) or abort(404)
+    return send_from_directory(photos.folder(), photos.thumb_name(row["filename"]), max_age=31536000)
+
+
+@bp.route("/photos/<int:photo_id>/delete", methods=["POST"])
+def delete_photo(photo_id):
+    row = store.get_photo(photo_id) or abort(404)
+    store.delete_photo(photo_id)
+    photos.delete_files(row["filename"])
+    flash("Bilden har tagits bort.", "success")
+    return redirect(url_for(
+        ".detail", species=row["species"], ppn=row["ppn"], individual_number=row["individual_number"],
+    ))
+
+
+@bp.app_errorhandler(RequestEntityTooLarge)
+def too_large(exc):
+    limit = request.max_content_length // (1024 * 1024) if request.max_content_length else 0
+    flash(f"Uppladdningen är för stor (högst {limit} MB).", "error")
+    return redirect(request.referrer or url_for(".index"))
 
 
 def _form(animal_id=None):

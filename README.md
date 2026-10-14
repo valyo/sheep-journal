@@ -60,7 +60,9 @@ checks that both give the same tables.
 Beyond the journal itself:
 
 - **Animal register**: name, exact birth date, sex, colour, breed, markings, mother and
-  father, elitlamm numbers, tag type and colour.
+  father, elitlamm numbers, tag type and colour, and up to two photos. Photos are turned
+  upright, resized and re-encoded as JPEG (which drops EXIF data such as GPS position),
+  and stored in `instance/uploads/` next to the database.
 - **Ear-tag lambs**: births can be recorded as a litter (with mother and males/females) and
   the lambs ear-tagged later. Tagging rows appear on the plus sheet but don't change the
   balance.
@@ -84,6 +86,7 @@ sheep_journal/
   migrations/      upgrades for existing databases
   constants.py     event types and labels
   ids.py           ear tag number parsing
+  photos.py        animal photo processing
   importer.py      Google Sheets / xlsx import
   rules.py         form parsing and the record-keeping rules
   store.py         database queries
