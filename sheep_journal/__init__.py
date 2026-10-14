@@ -17,6 +17,8 @@ def create_app(test_config=None):
     )
     if test_config:
         app.config.update(test_config)
+    if os.environ.get("SHEEP_JOURNAL_ENV") == "production" and app.config["SECRET_KEY"] == "dev":
+        raise RuntimeError("Set the SECRET_KEY environment variable to a long random value.")
 
     data_dir = os.path.dirname(os.path.abspath(app.config["DATABASE"]))
     # Animal photos are kept next to the database, so they are backed up together.

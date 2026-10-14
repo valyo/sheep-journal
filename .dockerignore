@@ -1,5 +1,12 @@
 .git
+.github
 .venv
 instance
+tests
 **/__pycache__
 .pytest_cache
+*.xlsx
+*.xls
+*.csv
+*.sqlite
+import-report-*.md

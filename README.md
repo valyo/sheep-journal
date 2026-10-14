@@ -1,5 +1,8 @@
 # Stalljournal – sheep and goats
 
+[![Tests](https://github.com/valyo/sheep-journal/actions/workflows/test.yml/badge.svg)](https://github.com/valyo/sheep-journal/actions/workflows/test.yml)
+[![Build and Push Docker Image](https://github.com/valyo/sheep-journal/actions/workflows/docker-build.yml/badge.svg)](https://github.com/valyo/sheep-journal/actions/workflows/docker-build.yml)
+
 A small Flask + SQLite app for keeping the herd register (*stalljournal*, "fårjournal")
 that Jordbruksverket requires for sheep and goats.
 
@@ -17,6 +20,20 @@ the host.
 docker compose run --rm web flask --app sheep_journal seed-demo   # demo herd (empty DB only)
 docker compose run --rm web pytest                                # tests
 ```
+
+### Production image
+
+CI builds the `production` stage of the Dockerfile (gunicorn, non-root user) and, on
+pushes to `main`, publishes it to `ghcr.io/valyo/sheep-journal` tagged with the
+version in `VERSION` and `latest`. Pull requests build and scan the image without
+pushing. Bump `VERSION` for each release.
+
+```bash
+docker run -d -p 8000:8000 -e SECRET_KEY=<long random value> \
+  -v sheep-journal-data:/app/instance ghcr.io/valyo/sheep-journal:latest
+```
+
+The app has no login yet: only run it where you control who can reach it.
 
 ### Importing the old Google Sheets journal
 
