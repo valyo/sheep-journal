@@ -17,18 +17,26 @@ def create_app(test_config=None):
     )
     if test_config:
         app.config.update(test_config)
+    if os.environ.get("SHEEP_JOURNAL_ENV") == "production" and app.config["SECRET_KEY"] == "dev":
+        raise RuntimeError("Set the SECRET_KEY environment variable to a long random value.")
 
-    os.makedirs(os.path.dirname(os.path.abspath(app.config["DATABASE"])), exist_ok=True)
+    data_dir = os.path.dirname(os.path.abspath(app.config["DATABASE"]))
+    # Animal photos are kept next to the database, so they are backed up together.
+    app.config.setdefault("UPLOAD_FOLDER", os.path.join(data_dir, "uploads"))
+    # Two phone photos per upload.
+    app.config.setdefault("MAX_CONTENT_LENGTH", 40 * 1024 * 1024)
+    os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
     from . import db, filters
 
     db.init_app(app)
     filters.init_app(app)
 
-    from .views import animals, journal, main
+    from .views import animals, journal, main, registers
 
     app.register_blueprint(main.bp)
     app.register_blueprint(journal.bp)
     app.register_blueprint(animals.bp)
+    app.register_blueprint(registers.bp)
 
     return app

@@ -3,9 +3,9 @@
 {% block title %}Journal{% endblock %}
 {% block content %}
 <div class="heading-row">
-  <h1>Journal</h1>
+  <h1>Stalljournal</h1>
   <div class="print-links">
-    Print:
+    Skriv ut:
     <a href="{{ url_for('journal.print_sheet', sheet='plus', year=filters.year) }}">plusblad</a> ·
     <a href="{{ url_for('journal.print_sheet', sheet='minus', year=filters.year) }}">minusblad</a> ·
     <a href="{{ url_for('journal.print_sheet', sheet='temp', year=filters.year) }}">tillfälligt ute</a>
@@ -13,30 +13,30 @@
 </div>
 
 <form method="get" class="filters">
-  <select name="direction" aria-label="Plus or minus">
-    <option value="">Plus and minus</option>
+  <select name="direction" aria-label="Plus eller minus">
+    <option value="">Plus och minus</option>
     <option value="in" {% if filters.direction == 'in' %}selected{% endif %}>+ In</option>
-    <option value="out" {% if filters.direction == 'out' %}selected{% endif %}>− Out</option>
+    <option value="out" {% if filters.direction == 'out' %}selected{% endif %}>− Ut</option>
   </select>
-  <select name="year" aria-label="Year">
-    <option value="">All years</option>
+  <select name="year" aria-label="År">
+    <option value="">Alla år</option>
     {% for y in years %}<option {% if filters.year == y %}selected{% endif %}>{{ y }}</option>{% endfor %}
   </select>
-  <select name="species" aria-label="Species">
-    <option value="">All species</option>
+  <select name="species" aria-label="Djurslag">
+    <option value="">Alla djurslag</option>
     {% for key, label in SPECIES.items() %}<option value="{{ key }}" {% if filters.species == key %}selected{% endif %}>{{ label }}</option>{% endfor %}
   </select>
-  <select name="event_type" aria-label="Event">
-    <option value="">All events</option>
+  <select name="event_type" aria-label="Händelse">
+    <option value="">Alla händelser</option>
     {% for key, ev in EVENT_TYPES.items() %}<option value="{{ key }}" {% if filters.event_type == key %}selected{% endif %}>{{ '+' if ev.direction == 'in' else '−' }} {{ ev.label }}</option>{% endfor %}
   </select>
-  <select name="flag" aria-label="Problems">
-    <option value="">Any status</option>
+  <select name="flag" aria-label="Brister">
+    <option value="">Alla rader</option>
     {% for key, label in FLAG_LABELS.items() %}<option value="{{ key }}" {% if filters.flag == key %}selected{% endif %}>{{ label }}</option>{% endfor %}
   </select>
-  <input type="search" name="q" value="{{ filters.q or '' }}" placeholder="PPN, number, holding…" aria-label="Search">
-  <button type="submit">Filter</button>
-  {% if filters.values()|select|list %}<a href="{{ url_for('journal.index') }}">Clear</a>{% endif %}
+  <input type="search" name="q" value="{{ filters.q or '' }}" placeholder="PPN, nummer, gård …" aria-label="Sök">
+  <button type="submit">Filtrera</button>
+  {% if filters.values()|select|list %}<a href="{{ url_for('journal.index') }}">Rensa</a>{% endif %}
 </form>
 
 {% if rows %}
@@ -44,13 +44,13 @@
 <table class="journal">
   <thead>
     <tr>
-      <th></th><th>Date</th><th>Event</th><th>Species</th><th>ID (PPN-individnr)</th><th class="num">Count</th>
-      <th>Born</th><th>Supplier / recipient</th><th>Transporter</th><th>Other</th><th></th>
+      <th></th><th>Datum</th><th>Händelse</th><th>Djurslag</th><th>ID (PPN-individnr)</th><th class="num">Antal</th>
+      <th>Född</th><th>Leverantör / mottagare</th><th>Transportör</th><th>Övrigt</th><th></th>
     </tr>
   </thead>
   <tbody>
   {% for e, flags in rows %}
-    <tr class="{% if e.voided_at %}voided{% endif %}" {% if e.voided_at %}title="Voided {{ e.voided_at[:10] }}: {{ e.void_reason }}"{% endif %}>
+    <tr class="{% if e.voided_at %}voided{% endif %}" {% if e.voided_at %}title="Makulerad {{ e.voided_at[:10] }}: {{ e.void_reason }}"{% endif %}>
       <td>{{ direction_badge(e.direction) }}</td>
       <td class="nowrap">{{ e.event_date }}</td>
       <td>{{ e.event_type|event_label }}</td>
@@ -58,22 +58,22 @@
       <td class="nowrap">{{ animal_id(e) }}{% if e.breeding %} <span class="badge" title="Livdjur">L</span>{% endif %}</td>
       <td class="num">{{ e.count }}</td>
       <td>{{ e.birth_year or '' }}</td>
-      <td>{{ e.counterparty or '' }}</td>
+      <td>{{ e.counterparty|party }}</td>
       <td>{% if e.driver_name or e.vehicle_reg %}{{ e.driver_name or '' }} {{ e.vehicle_reg or '' }}{% endif %}</td>
       <td class="other">
         {{ remarks(e, holding) }}
         {% for f in flags %}<span class="badge badge-warning">{{ FLAG_LABELS[f] }}</span>{% endfor %}
-        {% if e.voided_at %}<span class="badge">Voided: {{ e.void_reason }}</span>{% endif %}
+        {% if e.voided_at %}<span class="badge">Makulerad: {{ e.void_reason }}</span>{% endif %}
       </td>
-      <td>{% if not e.voided_at %}<a href="{{ url_for('journal.edit', entry_id=e.id) }}">Edit</a>{% endif %}</td>
+      <td>{% if not e.voided_at %}<a href="{{ url_for('journal.edit', entry_id=e.id) }}">Ändra</a>{% endif %}</td>
     </tr>
   {% endfor %}
   </tbody>
 </table>
 </div>
-<p class="muted">{{ rows|length }} row(s). Voided entries are crossed out and don't count in the balance.</p>
+<p class="muted">{{ rows|length }} rad(er). Makulerade rader är överstrukna och räknas inte i saldot.</p>
 {% else %}
-  <p class="muted">No entries{% if filters.values()|select|list %} match the filter{% endif %}.
-  <a href="{{ url_for('journal.new', direction='in') }}">Record the first animals →</a></p>
+  <p class="muted">Inga rader{% if filters.values()|select|list %} matchar filtret{% endif %}.
+  <a href="{{ url_for('journal.new', direction='in') }}">För in de första djuren →</a></p>
 {% endif %}
 {% endblock %}

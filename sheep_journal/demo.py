@@ -35,10 +35,10 @@ def seed():
 
     store.save_holding({
         "ppn": OWN_PPN,
-        "keeper_name": "Demo Farm",
+        "keeper_name": "Demogården",
         "address": "Fårvägen 1, 123 45 Byn",
         "species": "sheep",
-        "category": "Meat (kött)",
+        "category": "Kött",
         "main_breed": "Gotlandsfår",
         "journal_start": date(last, 2, 2).isoformat(),
     })

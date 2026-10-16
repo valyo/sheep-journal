@@ -44,7 +44,7 @@ def holding():
         data, errors = rules.parse_holding_form(request.form)
         if not errors:
             store.save_holding(data)
-            flash("Holding details saved.", "success")
+            flash("Uppgifterna om anläggningen har sparats.", "success")
             return redirect(url_for(".dashboard"))
         values = request.form
     else:
@@ -61,7 +61,7 @@ def counts():
         data, errors = rules.parse_count_form(request.form)
         if not errors:
             store.save_count(data)
-            flash(f"December count {data['year']} saved.", "success")
+            flash(f"Decemberräkningen {data['year']} har sparats.", "success")
             return redirect(url_for(".counts"))
         values = request.form
     else:

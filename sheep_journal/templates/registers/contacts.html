@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Kontakter{% endblock %}
+{% block content %}
+<div class="heading-row">
+  <h1>Kontakter (PPN-register)</h1>
+  <a class="button" href="{{ url_for('registers.contact_form') }}">Lägg till kontakt</a>
+</div>
+<p class="lede">Gårdar och slakterier som dina djur kommer från eller går till. Namnen visas bredvid PPN i journalen, och formuläret föreslår dem.</p>
+
+{% if contacts %}
+<div class="table-wrap">
+<table>
+  <thead><tr><th>PPN</th><th>Namn</th><th>Typ</th><th>Djurhållare</th><th>Telefon</th><th>Adress</th><th></th></tr></thead>
+  <tbody>
+  {% for c in contacts %}
+    <tr>
+      <td class="nowrap">{{ c.ppn or '—' }}</td>
+      <td>{{ c.name }}</td>
+      <td>{{ CONTACT_KINDS[c.kind] }}</td>
+      <td>{{ c.keeper or '' }}</td>
+      <td class="nowrap">{{ c.phone or '' }}</td>
+      <td>{{ c.address or '' }}</td>
+      <td><a href="{{ url_for('registers.contact_form', contact_id=c.id) }}">Ändra</a></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% else %}
+<p class="muted">Inga kontakter än.</p>
+{% endif %}
+{% endblock %}

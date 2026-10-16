@@ -1,20 +1,44 @@
 {% extends "base.html" %}
 {% from "_macros.html" import field, select, textarea %}
-{% block title %}Holding{% endblock %}
+{% block title %}Anläggning{% endblock %}
 {% block content %}
-<h1>Holding (produktionsplats)</h1>
-<p class="lede">The journal covers one production site. Register the site with Jordbruksverket before you keep animals there.</p>
+<h1>Anläggning (produktionsplats)</h1>
+<p class="lede">Journalen gäller en produktionsplats. Här står uppgifterna som är registrerade hos Jordbruksverket
+  (flik B i pappersjournalen). Andra gårdar och slakterier finns under <a href="{{ url_for('registers.contacts') }}">Kontakter</a>.</p>
 
 <form method="post" class="form">
-  <div class="grid">
-    {{ field("ppn", "Production site number (PPN)", values, errors, help="As registered with Jordbruksverket, e.g. 12345", attrs='inputmode="numeric" required') }}
-    {{ field("keeper_name", "Animal keeper (djurhållare)", values, errors, attrs="required") }}
-    {{ textarea("address", "Address of the site", values, errors) }}
-    {{ select("species", "Animals kept", HOLDING_SPECIES, values, errors) }}
-    {{ select("category", "Category (inriktning)", CATEGORY_OPTIONS, values, errors, blank="—") }}
-    {{ field("main_breed", "Main breed (huvudsaklig ras)", values, errors, help="Animals of other breeds get the breed noted on their row.") }}
-    {{ field("journal_start", "Journal started", values, errors, type="date") }}
-  </div>
-  <button type="submit">Save</button>
+  <fieldset>
+    <legend>Anläggningsinformation</legend>
+    <div class="grid">
+      {{ field("ppn", "Produktionsplatsnummer (PPN)", values, errors, help="Som det är registrerat hos Jordbruksverket, t.ex. SE 123456", attrs='required') }}
+      {{ field("registered_from", "Registrerad fr.o.m.", values, errors, type="date") }}
+      {{ field("address", "Adress", values, errors) }}
+      {{ field("postal_address", "Postadress", values, errors) }}
+      {{ field("municipality", "Kommun", values, errors) }}
+      {{ field("county", "Län", values, errors) }}
+      {{ field("property_designation", "Fastighetsbeteckning", values, errors) }}
+      {{ field("area_ha", "Areal (hektar)", values, errors, attrs='inputmode="decimal"') }}
+      {{ field("housing", "Djuren hålls", values, errors, help="t.ex. både inomhus och utomhus") }}
+    </div>
+  </fieldset>
+  <fieldset>
+    <legend>Djurhållare (aktör)</legend>
+    <div class="grid">
+      {{ field("keeper_name", "Namn", values, errors, attrs="required") }}
+      {{ field("phone", "Telefon", values, errors, type="tel") }}
+      {{ field("email", "E-post", values, errors, type="email") }}
+    </div>
+  </fieldset>
+  <fieldset>
+    <legend>Arter och anläggningstyper</legend>
+    <div class="grid">
+      {{ select("species", "Djurslag", HOLDING_SPECIES, values, errors) }}
+      {{ field("max_capacity", "Max kapacitet", values, errors, type="number", attrs='min="0"') }}
+      {{ field("category", "Kategori", values, errors, help="Som registrerat, t.ex. Avelsbesättning; Hobby") }}
+      {{ field("main_breed", "Huvudsaklig ras", values, errors, help="Djur av andra raser får rasen antecknad på sin rad.") }}
+      {{ field("journal_start", "Journalen påbörjad", values, errors, type="date") }}
+    </div>
+  </fieldset>
+  <button type="submit">Spara</button>
 </form>
 {% endblock %}

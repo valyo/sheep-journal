@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% from "_macros.html" import field, select %}
+{% block title %}Öronmärken{% endblock %}
+{% block content %}
+<h1>Öronmärken i lager</h1>
+<p class="lede">Märken som beställts till din produktionsplats. Ett märke räknas som använt när ett djur eller en rad i journalen har numret.
+  Djur som hålls längre än 12 månader ska ha två märken; slaktlamm får ha ett.</p>
+
+<section class="cards">
+  <div class="card stat"><h2>Oanvända enkla märken</h2><p class="big">{{ summary.single }}</p></div>
+  <div class="card stat"><h2>Oanvända dubbla märken</h2><p class="big">{{ summary.double }}</p></div>
+</section>
+
+<h2>Lägg till en märkesbeställning</h2>
+<form method="post" class="form">
+  <div class="grid">
+    {{ field("first", "Första nummer", values, errors, attrs='required inputmode="numeric"', help="t.ex. 00013") }}
+    {{ field("last", "Sista nummer", values, errors, attrs='inputmode="numeric"', help="Lämna tomt för ett enda märke") }}
+    {{ select("tag_type", "Typ", TAG_TYPES, values, errors) }}
+    {{ field("tag_model", "Modell", values, errors, help="t.ex. micro") }}
+    {{ field("tag_colour", "Färg", values, errors) }}
+    {{ field("order_ref", "Ordernummer", values, errors, help="Från leverantören, t.ex. 2023/10001") }}
+    {{ select("species", "Djurslag", SPECIES, values, errors) }}
+  </div>
+  <button type="submit">Lägg till i lager</button>
+</form>
+
+{% if rows %}
+<h2>Alla märken</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Nummer</th><th>Typ</th><th>Modell</th><th>Färg</th><th>Order</th><th>Status</th><th></th></tr></thead>
+  <tbody>
+  {% for t, a in rows %}
+    <tr class="{% if t.lost %}voided{% endif %}">
+      <td class="nowrap">{{ tag_label(holding.ppn, t.individual_number) if holding else t.individual_number }}</td>
+      <td>{{ t.tag_type|tag_type_label }}</td>
+      <td>{{ t.tag_model or '' }}</td>
+      <td>{{ t.tag_colour or '' }}</td>
+      <td>{{ t.order_ref or '' }}</td>
+      <td>
+        {% if t.used and a %}
+          Använt: <a href="{{ url_for('animals.detail', species=a.species, ppn=a.ppn, individual_number=a.individual_number) }}">{{ a.name or a.ref }}</a>
+        {% elif t.used %}Använt{% elif t.lost %}Förlorat{% else %}<span class="status-present">Oanvänt</span>{% endif %}
+      </td>
+      <td>
+        {% if not t.used %}
+        <form method="post" action="{{ url_for('registers.tag_lost', tag_id=t.id) }}">
+          <input type="hidden" name="lost" value="{{ 0 if t.lost else 1 }}">
+          <button type="submit" class="link">{{ 'Hittat igen' if t.lost else 'Markera som förlorat' }}</button>
+        </form>
+        {% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endif %}
+{% endblock %}

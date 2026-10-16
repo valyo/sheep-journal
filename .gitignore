@@ -3,3 +3,9 @@ __pycache__/
 .pytest_cache/
 .venv/
 *.pyc
+
+# Real herd data exported from spreadsheets (contains personal data)
+*.xlsx
+*.xls
+*.csv
+import-report-*.md

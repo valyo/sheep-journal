@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% from "_macros.html" import field, select, textarea %}
+{% block title %}{% if contact %}Ändra kontakt{% else %}Lägg till kontakt{% endif %}{% endblock %}
+{% block content %}
+<h1>{% if contact %}{{ contact.name }}{% else %}Lägg till kontakt{% endif %}</h1>
+<form method="post" class="form">
+  <div class="grid">
+    {{ field("ppn", "PPN", values, errors, help="Produktionsplatsnummer, t.ex. SE 234567. Lämna tomt för köpare utan produktionsplats.") }}
+    {{ field("name", "Gårdens eller företagets namn", values, errors, attrs="required") }}
+    {{ select("kind", "Typ", CONTACT_KINDS, values, errors) }}
+    {{ field("keeper", "Djurhållare / kontaktperson", values, errors) }}
+    {{ field("phone", "Telefon", values, errors, type="tel") }}
+    {{ field("email", "E-post", values, errors, type="email") }}
+    {{ textarea("address", "Adress", values, errors) }}
+    {{ textarea("notes", "Anteckningar", values, errors) }}
+  </div>
+  <div class="buttons">
+    <button type="submit">Spara</button>
+    <a href="{{ url_for('registers.contacts') }}">Avbryt</a>
+  </div>
+</form>
+{% endblock %}

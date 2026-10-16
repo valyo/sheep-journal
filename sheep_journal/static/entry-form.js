@@ -12,6 +12,7 @@
       movement: data.movement === "1",
       transport: data.transport === "1",
       death: select.value === "death",
+      birth: select.value === "birth",
     };
     form.querySelectorAll("[data-show]").forEach((el) => {
       el.hidden = !show[el.dataset.show];

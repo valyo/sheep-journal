@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Skötsel{% endblock %}
+{% block content %}
+<div class="heading-row">
+  <h1>Skötsel och behandlingar</h1>
+  <a class="button" href="{{ url_for('registers.herd_log_new') }}">Ny anteckning</a>
+</div>
+<p class="lede">Klippning, behandlingar, vaccinationer och annat arbete som inte är förflyttningar. Läkemedelsanteckningar
+  (preparat, dos, karenstid) ska sparas i 5 år.</p>
+
+<form method="get" class="filters">
+  <select name="kind" aria-label="Typ">
+    <option value="">Alla typer</option>
+    {% for key, label in HERD_EVENT_KINDS.items() %}<option value="{{ key }}" {% if kind == key %}selected{% endif %}>{{ label }}</option>{% endfor %}
+  </select>
+  <input name="year" value="{{ year or '' }}" placeholder="År" inputmode="numeric" aria-label="År" size="6">
+  <button type="submit">Filtrera</button>
+</form>
+
+{% if events %}
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Datum</th><th>Vad</th><th>Djur</th><th>Preparat / dos</th><th>Karenstid t.o.m.</th><th>Anteckningar</th><th></th></tr></thead>
+  <tbody>
+  {% for e in events %}
+    {% set a = animals.get((e.species, e.ppn, e.individual_number)) if e.individual_number else none %}
+    <tr>
+      <td class="nowrap">{{ e.event_date }}</td>
+      <td>{{ e.kind|herd_kind_label }}</td>
+      <td>
+        {% if e.individual_number %}
+          <a href="{{ url_for('animals.detail', species=e.species, ppn=e.ppn, individual_number=e.individual_number) }}">{{ e.ppn }}-{{ e.individual_number }}</a>{% if a and a.name %} {{ a.name }}{% endif %}
+        {% else %}{{ e.subject or '' }}{% endif %}
+      </td>
+      <td>{{ e.product or '' }}{% if e.dose %} · {{ e.dose }}{% endif %}{% if e.prescribed_by %} <span class="muted">({{ e.prescribed_by }})</span>{% endif %}</td>
+      <td class="nowrap">{{ e.withdrawal_until or '' }}</td>
+      <td>{{ e.description or '' }}{% if e.notes %} {{ e.notes }}{% endif %}</td>
+      <td>
+        {% if e.kind not in MEDICINE_KINDS %}
+        <form method="post" action="{{ url_for('registers.herd_log_delete', event_id=e.id) }}" onsubmit="return confirm('Ta bort anteckningen?')">
+          <button type="submit" class="link">Ta bort</button>
+        </form>
+        {% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% else %}
+<p class="muted">Inget antecknat{% if kind or year %} för det här filtret{% endif %}.</p>
+{% endif %}
+{% endblock %}

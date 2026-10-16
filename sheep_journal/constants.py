@@ -13,61 +13,93 @@ class EventType:
     transport: bool = False
     # Temporary stay away from the holding (tillfälligt ute), e.g. summer grazing.
     temporary: bool = False
+    # False for rows that identify animals already counted, e.g. ear-tagging lambs
+    # whose birth was recorded as a group. They don't change the balance.
+    counted: bool = True
 
 
 EVENT_TYPES = {
     e.key: e
     for e in [
-        EventType("opening_balance", "in", "Opening balance", "Ingående balans"),
-        EventType("birth", "in", "Born on the holding", "Födda"),
-        EventType("purchase", "in", "Purchased", "Inköp", movement=True),
-        EventType("loan_in", "in", "Borrowed in (e.g. a ram)", "Inlånad", movement=True),
+        EventType("opening_balance", "in", "Ingående balans", "Ingående balans"),
+        EventType("birth", "in", "Födda på gården", "Födda"),
         EventType(
-            "return_home", "in", "Back from temporary stay", "Åter från tillfälligt ute",
+            "tagging", "in", "Öronmärkning (identifiering)", "Identifiering / öronmärkning",
+            counted=False,
+        ),
+        EventType("purchase", "in", "Inköp", "Inköp", movement=True),
+        EventType(
+            "loan_in", "in", "Inlånad / tillfälligt inkommen", "Inlånad / tillfälligt inkommen",
+            movement=True,
+        ),
+        EventType(
+            "return_home", "in", "Åter från tillfälligt ute", "Åter från tillfälligt ute",
             movement=True, temporary=True,
         ),
-        EventType("recruitment_in", "in", "Own recruitment (now individual)", "Egen rekrytering"),
-        EventType("other_in", "in", "Other arrival", "Övrigt in", movement=True),
-        EventType("sale", "out", "Sold live", "Försäljning", movement=True, transport=True),
-        EventType("slaughter", "out", "Sent to slaughter", "Slakt", movement=True, transport=True),
+        EventType("recruitment_in", "in", "Egen rekrytering (nu individregistrerad)", "Egen rekrytering"),
+        EventType("other_in", "in", "Övrigt in", "Övrigt in", movement=True),
+        EventType("sale", "out", "Försäljning (levande)", "Försäljning", movement=True, transport=True),
+        EventType("slaughter", "out", "Till slakt", "Slakt", movement=True, transport=True),
         EventType(
-            "loan_return", "out", "Borrowed animal returned", "Återlämnad",
+            "loan_return", "out", "Återlämnad till ägaren", "Återlämnad",
             movement=True, transport=True,
         ),
         EventType(
-            "temp_out", "out", "Temporarily away (grazing etc.)", "Tillfälligt ute",
+            "temp_out", "out", "Tillfälligt ute (bete m.m.)", "Tillfälligt ute",
             movement=True, transport=True, temporary=True,
         ),
-        EventType("death", "out", "Died on the holding", "Död i besättningen"),
-        EventType("home_slaughter", "out", "Home slaughter", "Hemslakt"),
-        EventType("recruitment_out", "out", "Own recruitment (out of group)", "Egen rekrytering"),
-        EventType("other_out", "out", "Other departure", "Övrigt ut", movement=True, transport=True),
+        EventType("death", "out", "Död i besättningen", "Död i besättningen"),
+        EventType("home_slaughter", "out", "Hemslakt", "Hemslakt"),
+        EventType("recruitment_out", "out", "Egen rekrytering (ur grupp)", "Egen rekrytering"),
+        EventType("other_out", "out", "Övrigt ut", "Övrigt ut", movement=True, transport=True),
     ]
 }
 
+UNCOUNTED_TYPES = tuple(k for k, e in EVENT_TYPES.items() if not e.counted)
+
 # Events whose date isn't bound by the 48-hour rule: births are recorded once all
 # lambs are born and tagged (at most 6 months after the first birth).
-EXEMPT_FROM_48H = {"birth", "opening_balance"}
+EXEMPT_FROM_48H = {"birth", "tagging", "opening_balance"}
 
-SPECIES = {"sheep": "Sheep (får)", "goat": "Goat (get)"}
-HOLDING_SPECIES = {**SPECIES, "both": "Sheep and goats"}
+SPECIES = {"sheep": "Får", "goat": "Get"}
+SPECIES_PLURAL = {"sheep": "får", "goat": "getter"}
+HOLDING_SPECIES = {"sheep": "Får", "goat": "Getter", "both": "Får och getter"}
 
-SEXES = {"F": "Female (tacka / get)", "M": "Male (bagge / bock)"}
+SEXES = {"F": "Hona (tacka / get)", "M": "Hane (bagge / bock)"}
 
 CATEGORIES = [
-    "Meat (kött)",
-    "Milk (mjölk)",
-    "Wool (ull)",
-    "Skins (skinn)",
-    "Breeding (avel)",
-    "Landscape management (landskapsvård)",
+    "Kött",
+    "Mjölk",
+    "Ull",
+    "Skinn",
+    "Avel",
+    "Landskapsvård",
     "Hobby",
 ]
 
+TAG_TYPES = {"single": "Enkelt märke", "double": "Dubbla märken"}
+
+CONTACT_KINDS = {"farm": "Gård", "slaughterhouse": "Slakteri", "other": "Övrigt"}
+
+# Husbandry events outside the journal. Medicine kinds need the product recorded.
+HERD_EVENT_KINDS = {
+    "shearing": "Klippning",
+    "treatment": "Läkemedelsbehandling",
+    "vaccination": "Vaccination",
+    "deworming": "Avmaskning",
+    "hoof": "Klövverkning",
+    "weighing": "Vägning",
+    "mating": "Betäckning / bagge insläppt",
+    "scanning": "Dräktighetsundersökning",
+    "vet": "Veterinärbesök",
+    "other": "Övrigt",
+}
+MEDICINE_KINDS = {"treatment", "vaccination", "deworming"}
+
 FLAG_LABELS = {
-    "late": "Recorded > 48 h after event",
-    "no_transport": "Transporter missing",
-    "no_cause": "Cause of death missing",
+    "late": "Registrerad > 48 h efter händelsen",
+    "no_transport": "Transportör saknas",
+    "no_cause": "Dödsorsak saknas",
 }
 
 
